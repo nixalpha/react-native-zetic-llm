@@ -1,11 +1,13 @@
 package com.margelo.nitro.zeticllm
 
 import android.os.SystemClock
+import android.util.Log
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.core.Promise
 import com.zeticai.mlange.*
 import com.zeticai.mlange.core.cache.ModelCacheHandlingPolicy
 import com.zeticai.mlange.core.model.APType
+import com.zeticai.mlange.core.model.ModelLoadingStatus
 import com.zeticai.mlange.core.model.llm.*
 
 @DoNotStrip
@@ -20,6 +22,12 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       val initOption = makeInitOption(config.initOption)
       val cachePolicy = makeCachePolicy(config.cacheHandlingPolicy)
       val progress = makeProgressCallback(onDownload)
+      val statusChanged = makeStatusChangedCallback()
+
+      Log.d(
+        TAG,
+        "loadModel: name=${config.name}, version=${version ?: "latest"}, mode=${config.modelMode ?: "RUN_AUTO"}, explicitRuntime=${config.explicitRuntime != null}"
+      )
 
       val model = config.explicitRuntime?.let { explicit ->
         ZeticMLangeLLMModel(
@@ -31,6 +39,7 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
           quantType = makeQuantType(explicit.quantType),
           apType = makeAPType(explicit.apType),
           onProgress = progress,
+          onStatusChanged = statusChanged,
           cacheHandlingPolicy = cachePolicy,
           initOption = initOption
         )
@@ -42,50 +51,80 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
         modelMode = makeModelMode(config.modelMode),
         dataSetType = makeDataSetType(config.dataSetType),
         onProgress = progress,
+        onStatusChanged = statusChanged,
         cacheHandlingPolicy = cachePolicy,
         initOption = initOption
       )
 
+      Log.d(TAG, "loadModel: model initialized for ${config.name}")
       HybridZeticLLMModel(model)
     }
   }
 
   private fun normalize(value: String?): String = value?.trim()?.uppercase() ?: ""
 
-  private fun makeProgressCallback(onDownload: ((Double) -> Unit)?): ((Float) -> Unit)? {
-    if (onDownload == null) return null
+  private fun makeStatusChangedCallback(): (ModelLoadingStatus) -> Unit =
+    { status -> Log.d(TAG, "model loading status: $status") }
 
+  private fun makeProgressCallback(onDownload: ((Double) -> Unit)?): ((Float) -> Unit)? {
     val lock = Any()
     var lastProgress = Double.NaN
     var lastEmittedAt = 0L
+    var lastRawLogProgress = Double.NaN
+    var lastRawLoggedAt = 0L
 
     return { value: Float ->
       val progress = value.toDouble().coerceIn(0.0, 1.0)
       val now = SystemClock.uptimeMillis()
-      val shouldEmit = synchronized(lock) {
+      val decision = synchronized(lock) {
         val isFirst = lastProgress.isNaN()
         val isBoundary = progress == 0.0 || progress == 1.0
         val changedEnough = isFirst || kotlin.math.abs(progress - lastProgress) >= 0.01
         val waitedEnough = now - lastEmittedAt >= 250
+        val shouldLogRaw =
+          lastRawLogProgress.isNaN() ||
+            isBoundary && progress != lastRawLogProgress ||
+            kotlin.math.abs(progress - lastRawLogProgress) >= 0.001 ||
+            now - lastRawLoggedAt >= 1_000
 
-        when {
+        if (shouldLogRaw) {
+          lastRawLogProgress = progress
+          lastRawLoggedAt = now
+        }
+
+        val shouldEmit = when {
           isFirst -> true
           isBoundary && progress != lastProgress -> true
           changedEnough && waitedEnough -> true
           else -> false
-        }.also { emit ->
-          if (emit) {
-            lastProgress = progress
-            lastEmittedAt = now
-          }
         }
+
+        if (shouldEmit) {
+          lastProgress = progress
+          lastEmittedAt = now
+        }
+
+        ProgressDecision(shouldLogRaw, shouldEmit)
       }
 
-      if (shouldEmit) {
-        onDownload(progress)
+      if (decision.shouldLogRaw) {
+        Log.d(TAG, "download progress raw=${formatProgress(progress)}")
+      }
+
+      if (decision.shouldEmit) {
+        Log.d(TAG, "download progress forwarded=${formatProgress(progress)}")
+        onDownload?.invoke(progress)
       }
     }
   }
+
+  private data class ProgressDecision(
+    val shouldLogRaw: Boolean,
+    val shouldEmit: Boolean
+  )
+
+  private fun formatProgress(progress: Double): String =
+    "${"%.4f".format(progress)} (${(progress * 100.0).toInt()}%)"
 
   private fun makeModelMode(value: String?): LLMModelMode =
     when (normalize(value)) {
