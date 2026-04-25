@@ -4,7 +4,7 @@ import UIKit
 import ZeticMLange
 
 final class HybridZeticAgent: HybridZeticAgentSpec {
-  private let lock = NSLock()
+  private let stateQueue = DispatchQueue(label: "com.margelo.nitro.zeticllm.agent.state")
   private var model: ZeticMLangeLLMModel?
   private var listener: ((AgentEvent) -> Void)?
   private var state = "idle"
@@ -59,10 +59,11 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
         )
       }
 
-      self.lock.lock()
-      let oldModel = self.model
-      self.model = loaded
-      self.lock.unlock()
+      let oldModel = self.stateQueue.sync {
+        let previous = self.model
+        self.model = loaded
+        return previous
+      }
       oldModel?.forceDeinit()
 
       self.setState("idle")
@@ -72,30 +73,29 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
 
   func start(task: String, options: AgentOptions?) throws -> Promise<Void> {
     return Promise.async {
-      self.lock.lock()
-      guard let activeModel = self.model else {
-        self.lock.unlock()
-        throw ZeticLLMError.invalidOption("MODEL_NOT_LOADED: Call loadModel() before start().")
+      let activeModel: ZeticMLangeLLMModel = try self.stateQueue.sync {
+        guard let activeModel = self.model else {
+          throw ZeticLLMError.invalidOption("MODEL_NOT_LOADED: Call loadModel() before start().")
+        }
+        if self.isRunning {
+          throw ZeticLLMError.invalidOption("AGENT_RUNNING: The agent is already running.")
+        }
+        self.task = task
+        self.actionsTaken = 0
+        self.stopRequested = false
+        self.paused = false
+        self.isRunning = true
+        return activeModel
       }
-      if self.isRunning {
-        self.lock.unlock()
-        throw ZeticLLMError.invalidOption("AGENT_RUNNING: The agent is already running.")
-      }
-      self.task = task
-      self.actionsTaken = 0
-      self.stopRequested = false
-      self.paused = false
-      self.isRunning = true
-      self.lock.unlock()
 
       let maxActions = max(1, Int(options?.maxActions ?? 12))
       let maxRuntimeMs = max(1_000, Int(options?.maxRuntimeMs ?? 120_000))
       let deadline = Date().addingTimeInterval(Double(maxRuntimeMs) / 1_000)
 
       defer {
-        self.lock.lock()
-        self.isRunning = false
-        self.lock.unlock()
+        self.stateQueue.sync {
+          self.isRunning = false
+        }
         self.setState(self.stopRequested ? "stopped" : "idle")
         self.emit(type: "stopped", message: "Agent stopped after \(self.actionsTaken) action(s).")
       }
@@ -132,7 +132,7 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
         self.emit(type: "action", message: outcome.message, actionJson: self.jsonString(action))
 
         if outcome.done { break }
-        Thread.sleep(forTimeInterval: 0.35)
+        Self.sleep(milliseconds: 350)
       }
     }
   }
@@ -250,7 +250,7 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
       return ActionOutcome(message: delivered ? "Tapped at \(Int(point.x)), \(Int(point.y))." : "No tappable control found at \(Int(point.x)), \(Int(point.y)).", done: false, consumedAction: true)
     case "wait":
       let ms = min(max(action["ms"] as? Int ?? 500, 0), 5_000)
-      Thread.sleep(forTimeInterval: Double(ms) / 1_000)
+      Self.sleep(milliseconds: ms)
       return ActionOutcome(message: "Waited \(ms)ms.", done: false, consumedAction: true)
     case "askUser":
       paused = true
@@ -299,8 +299,8 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
       }
       var rects: [String: CGRect] = [:]
       var lines = ["iOS view hierarchy"]
-      appendView(window, id: "0", depth: 0, lines: &lines, rects: &rects)
-      nodeRects = rects
+      self.appendView(window, id: "0", depth: 0, lines: &lines, rects: &rects)
+      self.nodeRects = rects
       return lines.joined(separator: "\n")
     }
   }
@@ -346,7 +346,7 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
 
   private func waitWhilePaused() {
     while paused && !stopRequested {
-      Thread.sleep(forTimeInterval: 0.1)
+      Self.sleep(milliseconds: 100)
     }
   }
 
@@ -404,6 +404,10 @@ final class HybridZeticAgent: HybridZeticAgentSpec {
       .compactMap { $0 as? UIWindowScene }
       .flatMap { $0.windows }
       .first { $0.isKeyWindow }
+  }
+
+  private static func sleep(milliseconds: Int) {
+    usleep(useconds_t(max(0, milliseconds) * 1_000))
   }
 
   private static func normalize(_ value: String?) -> String {

@@ -9,6 +9,7 @@ import com.zeticai.mlange.core.cache.ModelCacheHandlingPolicy
 import com.zeticai.mlange.core.model.APType
 import com.zeticai.mlange.core.model.ModelLoadingStatus
 import com.zeticai.mlange.core.model.llm.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 @DoNotStrip
 class HybridZeticLLM : HybridZeticLLMSpec() {
@@ -21,7 +22,8 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       val version = config.version?.toInt()
       val initOption = makeInitOption(config.initOption)
       val cachePolicy = makeCachePolicy(config.cacheHandlingPolicy)
-      val progress = makeProgressCallback(onDownload)
+      val sawUsefulSdkProgress = AtomicBoolean(false)
+      val progress = makeProgressCallback(onDownload, sawUsefulSdkProgress)
       val statusChanged = makeStatusChangedCallback()
 
       Log.d(
@@ -29,32 +31,46 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
         "loadModel: name=${config.name}, version=${version ?: "latest"}, mode=${config.modelMode ?: "RUN_AUTO"}, explicitRuntime=${config.explicitRuntime != null}"
       )
 
-      val model = config.explicitRuntime?.let { explicit ->
-        ZeticMLangeLLMModel(
+      val model = MLangeDownloadSize.withDownloadedBytes(
+        context = context,
+        tag = TAG,
+        onBytes = { bytes ->
+          Log.d(
+            TAG,
+            "downloaded bytes from mlange_cache: $bytes (${MLangeDownloadSize.formatBytes(bytes)})"
+          )
+          if (bytes > 0L && !sawUsefulSdkProgress.get()) {
+            onDownload?.invoke(bytes.toDouble())
+          }
+        }
+      ) {
+        config.explicitRuntime?.let { explicit ->
+          ZeticMLangeLLMModel(
+            context = context,
+            personalKey = config.personalKey,
+            name = config.name,
+            version = version,
+            target = makeTarget(explicit.target),
+            quantType = makeQuantType(explicit.quantType),
+            apType = makeAPType(explicit.apType),
+            onProgress = progress,
+            onStatusChanged = statusChanged,
+            cacheHandlingPolicy = cachePolicy,
+            initOption = initOption
+          )
+        } ?: ZeticMLangeLLMModel(
           context = context,
           personalKey = config.personalKey,
           name = config.name,
           version = version,
-          target = makeTarget(explicit.target),
-          quantType = makeQuantType(explicit.quantType),
-          apType = makeAPType(explicit.apType),
+          modelMode = makeModelMode(config.modelMode),
+          dataSetType = makeDataSetType(config.dataSetType),
           onProgress = progress,
           onStatusChanged = statusChanged,
           cacheHandlingPolicy = cachePolicy,
           initOption = initOption
         )
-      } ?: ZeticMLangeLLMModel(
-        context = context,
-        personalKey = config.personalKey,
-        name = config.name,
-        version = version,
-        modelMode = makeModelMode(config.modelMode),
-        dataSetType = makeDataSetType(config.dataSetType),
-        onProgress = progress,
-        onStatusChanged = statusChanged,
-        cacheHandlingPolicy = cachePolicy,
-        initOption = initOption
-      )
+      }
 
       Log.d(TAG, "loadModel: model initialized for ${config.name}")
       HybridZeticLLMModel(model)
@@ -66,7 +82,10 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
   private fun makeStatusChangedCallback(): (ModelLoadingStatus) -> Unit =
     { status -> Log.d(TAG, "model loading status: $status") }
 
-  private fun makeProgressCallback(onDownload: ((Double) -> Unit)?): ((Float) -> Unit)? {
+  private fun makeProgressCallback(
+    onDownload: ((Double) -> Unit)?,
+    sawUsefulSdkProgress: AtomicBoolean
+  ): ((Float) -> Unit)? {
     val lock = Any()
     var lastProgress = Double.NaN
     var lastEmittedAt = 0L
@@ -75,6 +94,9 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
 
     return { value: Float ->
       val progress = value.toDouble().coerceIn(0.0, 1.0)
+      if (progress > 0.0) {
+        sawUsefulSdkProgress.set(true)
+      }
       val now = SystemClock.uptimeMillis()
       val decision = synchronized(lock) {
         val isFirst = lastProgress.isNaN()

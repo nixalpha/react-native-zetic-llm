@@ -21,6 +21,7 @@ import org.json.JSONObject
 import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 @DoNotStrip
 class HybridZeticAgent : HybridZeticAgentSpec() {
@@ -48,37 +49,51 @@ class HybridZeticAgent : HybridZeticAgentSpec() {
       val version = config.version?.toInt()
       val initOption = makeInitOption(config.initOption)
       val cachePolicy = makeCachePolicy(config.cacheHandlingPolicy)
-      val progress = makeProgressCallback(onDownload)
+      val sawUsefulSdkProgress = AtomicBoolean(false)
+      val progress = makeProgressCallback(onDownload, sawUsefulSdkProgress)
       val statusChanged: (ModelLoadingStatus) -> Unit = {
         emit("model_status", "Zetic model loading status: $it")
       }
 
-      val loaded = config.explicitRuntime?.let { explicit ->
-        ZeticMLangeLLMModel(
+      val loaded = MLangeDownloadSize.withDownloadedBytes(
+        context = context,
+        tag = TAG,
+        onBytes = { bytes ->
+          val formatted = MLangeDownloadSize.formatBytes(bytes)
+          Log.d(TAG, "downloaded bytes from mlange_cache: $bytes ($formatted)")
+          emit("model_download_bytes", "Model download cache grew by $formatted.")
+          if (bytes > 0L && !sawUsefulSdkProgress.get()) {
+            onDownload?.invoke(bytes.toDouble())
+          }
+        }
+      ) {
+        config.explicitRuntime?.let { explicit ->
+          ZeticMLangeLLMModel(
+            context = context,
+            personalKey = config.personalKey,
+            name = config.name,
+            version = version,
+            target = makeTarget(explicit.target),
+            quantType = makeQuantType(explicit.quantType),
+            apType = makeAPType(explicit.apType),
+            onProgress = progress,
+            onStatusChanged = statusChanged,
+            cacheHandlingPolicy = cachePolicy,
+            initOption = initOption
+          )
+        } ?: ZeticMLangeLLMModel(
           context = context,
           personalKey = config.personalKey,
           name = config.name,
           version = version,
-          target = makeTarget(explicit.target),
-          quantType = makeQuantType(explicit.quantType),
-          apType = makeAPType(explicit.apType),
+          modelMode = makeModelMode(config.modelMode),
+          dataSetType = makeDataSetType(config.dataSetType),
           onProgress = progress,
           onStatusChanged = statusChanged,
           cacheHandlingPolicy = cachePolicy,
           initOption = initOption
         )
-      } ?: ZeticMLangeLLMModel(
-        context = context,
-        personalKey = config.personalKey,
-        name = config.name,
-        version = version,
-        modelMode = makeModelMode(config.modelMode),
-        dataSetType = makeDataSetType(config.dataSetType),
-        onProgress = progress,
-        onStatusChanged = statusChanged,
-        cacheHandlingPolicy = cachePolicy,
-        initOption = initOption
-      )
+      }
 
       synchronized(lock) {
         model?.deinit()
@@ -393,9 +408,15 @@ class HybridZeticAgent : HybridZeticAgentSpec() {
     }
   }
 
-  private fun makeProgressCallback(onDownload: ((Double) -> Unit)?): ((Float) -> Unit)? =
+  private fun makeProgressCallback(
+    onDownload: ((Double) -> Unit)?,
+    sawUsefulSdkProgress: AtomicBoolean
+  ): ((Float) -> Unit)? =
     { value ->
       val progress = value.toDouble().coerceIn(0.0, 1.0)
+      if (progress > 0.0) {
+        sawUsefulSdkProgress.set(true)
+      }
       emit("model_progress", String.format(Locale.US, "Model download %.1f%%", progress * 100.0), progress = progress)
       onDownload?.invoke(progress)
     }

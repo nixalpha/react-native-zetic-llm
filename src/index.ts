@@ -34,17 +34,25 @@ export {
 } from './validation'
 import { validateLoadModelConfig, type LoadModelConfig } from './validation'
 
+/**
+ * Android fallback behavior:
+ * - 0..1 means SDK-reported percent progress.
+ * - >1 means downloaded byte count from filesDir/mlange_cache when the SDK
+ *   cannot compute percent for model files larger than Int.MAX_VALUE.
+ */
+export type DownloadProgressValue = number
+
 export interface ZeticLLM {
   loadModel(
     config: LoadModelConfig,
-    onDownload?: (progress: number) => void
+    onDownload?: (progressOrDownloadedBytes: DownloadProgressValue) => void
   ): Promise<ZeticLLMModel>
 }
 
 export interface ZeticAgent {
   loadModel(
     config: LoadModelConfig,
-    onDownload?: (progress: number) => void
+    onDownload?: (progressOrDownloadedBytes: DownloadProgressValue) => void
   ): Promise<void>
   start(task: string, options?: AgentOptions): Promise<void>
   pause(): void
@@ -83,7 +91,7 @@ export function createZeticLLM(): ZeticLLM {
 
 export function loadModel(
   config: LoadModelConfig,
-  onDownload?: (progress: number) => void
+  onDownload?: (progressOrDownloadedBytes: DownloadProgressValue) => void
 ) {
   return createZeticLLM().loadModel(config, onDownload)
 }
