@@ -1,12 +1,21 @@
 {
   "name": "react-native-zetic-llm",
-  "version": "0.0.1",
-  "description": "react-native-zetic-llm",
+  "version": "0.1.0",
+  "description": "React Native Nitro module for running Zetic Melange LLMs locally on iOS and Android.",
   "main": "lib/index",
   "module": "lib/index",
   "types": "lib/index.d.ts",
   "react-native": "src/index",
   "source": "src/index",
+  "exports": {
+    ".": {
+      "react-native": "./src/index.ts",
+      "source": "./src/index.ts",
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "src",
     "react-native.config.js",
@@ -23,10 +32,12 @@
     "ios/**/*.mm",
     "ios/**/*.cpp",
     "ios/**/*.swift",
+    "ios/**/*.rb",
     "app.plugin.js",
     "nitro.json",
     "*.podspec",
-    "README.md"
+    "README.md",
+    "!src/**/__tests__"
   ],
   "scripts": {
     "typecheck": "tsc --noEmit",
@@ -38,18 +49,25 @@
   },
   "keywords": [
     "react-native",
-    "nitro"
+    "nitro",
+    "nitro-modules",
+    "zetic",
+    "melange",
+    "llm",
+    "on-device-ai",
+    "ios",
+    "android"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mrousavy/nitro.git"
+    "url": "git+https://github.com/zetic-ai/react-native-zetic-llm.git"
   },
-  "author": "Marc Rousavy <me@mrousavy.com> (https://github.com/mrousavy)",
+  "author": "React Native Zetic LLM contributors",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mrousavy/nitro/issues"
+    "url": "https://github.com/zetic-ai/react-native-zetic-llm/issues"
   },
-  "homepage": "https://github.com/mrousavy/nitro#readme",
+  "homepage": "https://github.com/zetic-ai/react-native-zetic-llm#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

@@ -6,12 +6,14 @@ Pod::Spec.new do |s|
   s.name         = "NitroZeticLlm"
   s.version      = package["version"]
   s.summary      = package["description"]
+  s.description  = package["description"]
   s.homepage     = package["homepage"]
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => min_ios_version_supported, :visionos => 1.0 }
-  s.source       = { :git => "https://github.com/mrousavy/nitro.git", :tag => "#{s.version}" }
+  s.platforms    = { :ios => '16.0' }
+  s.swift_version = '5.9'
+  s.source       = { :git => "https://github.com/zetic-ai/react-native-zetic-llm.git", :tag => "#{s.version}" }
 
   s.source_files = [
     # Implementation (Swift)

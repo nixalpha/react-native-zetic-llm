@@ -71,6 +71,9 @@ android {
   }
 
   packagingOptions {
+    jniLibs {
+      useLegacyPackaging true
+    }
     excludes = [
             "META-INF",
             "META-INF/**",
@@ -138,5 +141,5 @@ dependencies {
 
   // Add a dependency on NitroModules
   implementation project(":react-native-nitro-modules")
+  implementation "com.zeticai.mlange:mlange:+"
 }
-

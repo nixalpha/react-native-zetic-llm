@@ -12,7 +12,18 @@
     ],
     "androidCxxLibName": "NitroZeticLlm"
   },
-  "autolinking": {},
+  "autolinking": {
+    "ZeticLLM": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridZeticLLM"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridZeticLLM"
+      }
+    }
+  },
   "ignorePaths": [
     "**/node_modules"
   ]
