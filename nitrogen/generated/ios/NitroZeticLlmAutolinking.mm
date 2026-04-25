@@ -11,6 +11,8 @@
 #import <type_traits>
 
 #include "HybridZeticLLMSpecSwift.hpp"
+#include "HybridZeticAgentSpecSwift.hpp"
+#include "HybridZeticAgentShadowTree.hpp"
 
 @interface NitroZeticLlmAutolinking : NSObject
 @end
@@ -26,6 +28,22 @@
     []() -> std::shared_ptr<HybridObject> {
       std::shared_ptr<HybridZeticLLMSpec> hybridObject = NitroZeticLlm::NitroZeticLlmAutolinking::createZeticLLM();
       return hybridObject;
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "ZeticAgent",
+    []() -> std::shared_ptr<HybridObject> {
+      std::shared_ptr<HybridZeticAgentSpec> hybridObject = NitroZeticLlm::NitroZeticLlmAutolinking::createZeticAgent();
+      return hybridObject;
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "ZeticAgentShadowTree",
+    []() -> std::shared_ptr<HybridObject> {
+      static_assert(std::is_default_constructible_v<HybridZeticAgentShadowTree>,
+                    "The HybridObject \"HybridZeticAgentShadowTree\" is not default-constructible! "
+                    "Create a public constructor that takes zero arguments to be able to autolink this HybridObject.");
+      return std::make_shared<HybridZeticAgentShadowTree>();
     }
   );
 }

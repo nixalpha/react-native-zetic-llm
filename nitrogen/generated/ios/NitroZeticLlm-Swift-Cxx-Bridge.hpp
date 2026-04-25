@@ -8,8 +8,16 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AgentEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct AgentEvent; }
+// Forward declaration of `AgentOptions` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct AgentOptions; }
+// Forward declaration of `AgentStateSnapshot` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct AgentStateSnapshot; }
 // Forward declaration of `GenerateResult` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct GenerateResult; }
+// Forward declaration of `HybridZeticAgentSpec` to properly resolve imports.
+namespace margelo::nitro::zeticllm { class HybridZeticAgentSpec; }
 // Forward declaration of `HybridZeticLLMModelSpec` to properly resolve imports.
 namespace margelo::nitro::zeticllm { class HybridZeticLLMModelSpec; }
 // Forward declaration of `HybridZeticLLMSpec` to properly resolve imports.
@@ -22,13 +30,19 @@ namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
 
 // Forward declarations of Swift defined types
+// Forward declaration of `HybridZeticAgentSpec_cxx` to properly resolve imports.
+namespace NitroZeticLlm { class HybridZeticAgentSpec_cxx; }
 // Forward declaration of `HybridZeticLLMModelSpec_cxx` to properly resolve imports.
 namespace NitroZeticLlm { class HybridZeticLLMModelSpec_cxx; }
 // Forward declaration of `HybridZeticLLMSpec_cxx` to properly resolve imports.
 namespace NitroZeticLlm { class HybridZeticLLMSpec_cxx; }
 
 // Include C++ defined types
+#include "AgentEvent.hpp"
+#include "AgentOptions.hpp"
+#include "AgentStateSnapshot.hpp"
 #include "GenerateResult.hpp"
+#include "HybridZeticAgentSpec.hpp"
 #include "HybridZeticLLMModelSpec.hpp"
 #include "HybridZeticLLMSpec.hpp"
 #include "NativeExplicitRuntimeConfig.hpp"
@@ -365,6 +379,122 @@ namespace margelo::nitro::zeticllm::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec____ create_Result_std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec____(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>>::withError(error);
+  }
+  
+  // pragma MARK: std::optional<bool>
+  /**
+   * Specialized version of `std::optional<bool>`.
+   */
+  using std__optional_bool_ = std::optional<bool>;
+  inline std::optional<bool> create_std__optional_bool_(const bool& value) noexcept {
+    return std::optional<bool>(value);
+  }
+  inline bool has_value_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<AgentOptions>
+  /**
+   * Specialized version of `std::optional<AgentOptions>`.
+   */
+  using std__optional_AgentOptions_ = std::optional<AgentOptions>;
+  inline std::optional<AgentOptions> create_std__optional_AgentOptions_(const AgentOptions& value) noexcept {
+    return std::optional<AgentOptions>(value);
+  }
+  inline bool has_value_std__optional_AgentOptions_(const std::optional<AgentOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AgentOptions get_std__optional_AgentOptions_(const std::optional<AgentOptions>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::string>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::string>>`.
+   */
+  using std__shared_ptr_Promise_std__string__ = std::shared_ptr<Promise<std::string>>;
+  inline std::shared_ptr<Promise<std::string>> create_std__shared_ptr_Promise_std__string__() noexcept {
+    return Promise<std::string>::create();
+  }
+  inline PromiseHolder<std::string> wrap_std__shared_ptr_Promise_std__string__(std::shared_ptr<Promise<std::string>> promise) noexcept {
+    return PromiseHolder<std::string>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::string& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::string&)>`.
+   */
+  using Func_void_std__string = std::function<void(const std::string& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::string& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__string_Wrapper final {
+  public:
+    explicit Func_void_std__string_Wrapper(std::function<void(const std::string& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::string& /* result */)>>(std::move(func))) {}
+    inline void call(std::string result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::string& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__string_Wrapper wrap_Func_void_std__string(Func_void_std__string value) noexcept {
+    return Func_void_std__string_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::function<void(const AgentEvent& /* event */)>
+  /**
+   * Specialized version of `std::function<void(const AgentEvent&)>`.
+   */
+  using Func_void_AgentEvent = std::function<void(const AgentEvent& /* event */)>;
+  /**
+   * Wrapper class for a `std::function<void(const AgentEvent& / * event * /)>`, this can be used from Swift.
+   */
+  class Func_void_AgentEvent_Wrapper final {
+  public:
+    explicit Func_void_AgentEvent_Wrapper(std::function<void(const AgentEvent& /* event */)>&& func): _function(std::make_unique<std::function<void(const AgentEvent& /* event */)>>(std::move(func))) {}
+    inline void call(AgentEvent event) const noexcept {
+      _function->operator()(event);
+    }
+  private:
+    std::unique_ptr<std::function<void(const AgentEvent& /* event */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_AgentEvent create_Func_void_AgentEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_AgentEvent_Wrapper wrap_Func_void_AgentEvent(Func_void_AgentEvent value) noexcept {
+    return Func_void_AgentEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<HybridZeticAgentSpec>
+  /**
+   * Specialized version of `std::shared_ptr<HybridZeticAgentSpec>`.
+   */
+  using std__shared_ptr_HybridZeticAgentSpec_ = std::shared_ptr<HybridZeticAgentSpec>;
+  std::shared_ptr<HybridZeticAgentSpec> create_std__shared_ptr_HybridZeticAgentSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridZeticAgentSpec_(std__shared_ptr_HybridZeticAgentSpec_ cppType);
+  
+  // pragma MARK: std::weak_ptr<HybridZeticAgentSpec>
+  using std__weak_ptr_HybridZeticAgentSpec_ = std::weak_ptr<HybridZeticAgentSpec>;
+  inline std__weak_ptr_HybridZeticAgentSpec_ weakify_std__shared_ptr_HybridZeticAgentSpec_(const std::shared_ptr<HybridZeticAgentSpec>& strong) noexcept { return strong; }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::string>>>
+  using Result_std__shared_ptr_Promise_std__string___ = Result<std::shared_ptr<Promise<std::string>>>;
+  inline Result_std__shared_ptr_Promise_std__string___ create_Result_std__shared_ptr_Promise_std__string___(const std::shared_ptr<Promise<std::string>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::string>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__string___ create_Result_std__shared_ptr_Promise_std__string___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::string>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<AgentStateSnapshot>
+  using Result_AgentStateSnapshot_ = Result<AgentStateSnapshot>;
+  inline Result_AgentStateSnapshot_ create_Result_AgentStateSnapshot_(const AgentStateSnapshot& value) noexcept {
+    return Result<AgentStateSnapshot>::withValue(value);
+  }
+  inline Result_AgentStateSnapshot_ create_Result_AgentStateSnapshot_(const std::exception_ptr& error) noexcept {
+    return Result<AgentStateSnapshot>::withError(error);
   }
 
 } // namespace margelo::nitro::zeticllm::bridge::swift

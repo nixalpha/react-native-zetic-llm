@@ -8,8 +8,16 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AgentEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct AgentEvent; }
+// Forward declaration of `AgentOptions` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct AgentOptions; }
+// Forward declaration of `AgentStateSnapshot` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct AgentStateSnapshot; }
 // Forward declaration of `GenerateResult` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct GenerateResult; }
+// Forward declaration of `HybridZeticAgentSpec` to properly resolve imports.
+namespace margelo::nitro::zeticllm { class HybridZeticAgentSpec; }
 // Forward declaration of `HybridZeticLLMModelSpec` to properly resolve imports.
 namespace margelo::nitro::zeticllm { class HybridZeticLLMModelSpec; }
 // Forward declaration of `HybridZeticLLMSpec` to properly resolve imports.
@@ -24,7 +32,11 @@ namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
 
 // Include C++ defined types
+#include "AgentEvent.hpp"
+#include "AgentOptions.hpp"
+#include "AgentStateSnapshot.hpp"
 #include "GenerateResult.hpp"
+#include "HybridZeticAgentSpec.hpp"
 #include "HybridZeticLLMModelSpec.hpp"
 #include "HybridZeticLLMSpec.hpp"
 #include "NativeExplicitRuntimeConfig.hpp"
@@ -49,6 +61,8 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include <NitroModules/DateToChronoDate.hpp>
 
 // Forward declarations of Swift defined types
+// Forward declaration of `HybridZeticAgentSpec_cxx` to properly resolve imports.
+namespace NitroZeticLlm { class HybridZeticAgentSpec_cxx; }
 // Forward declaration of `HybridZeticLLMModelSpec_cxx` to properly resolve imports.
 namespace NitroZeticLlm { class HybridZeticLLMModelSpec_cxx; }
 // Forward declaration of `HybridZeticLLMSpec_cxx` to properly resolve imports.

@@ -188,4 +188,8 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       "NPU" -> APType.NPU
       else -> throw IllegalArgumentException("INVALID_OPTION: Unsupported apType: $value")
     }
+
+  companion object {
+    private const val TAG = "ReactNativeZeticLLM"
+  }
 }

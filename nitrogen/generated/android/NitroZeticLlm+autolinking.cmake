@@ -35,9 +35,12 @@ target_sources(
   # Shared Nitrogen C++ sources
   ../nitrogen/generated/shared/c++/HybridZeticLLMModelSpec.cpp
   ../nitrogen/generated/shared/c++/HybridZeticLLMSpec.cpp
+  ../nitrogen/generated/shared/c++/HybridZeticAgentSpec.cpp
+  ../nitrogen/generated/shared/c++/HybridZeticAgentShadowTreeSpec.cpp
   # Android-specific Nitrogen C++ sources
   ../nitrogen/generated/android/c++/JHybridZeticLLMModelSpec.cpp
   ../nitrogen/generated/android/c++/JHybridZeticLLMSpec.cpp
+  ../nitrogen/generated/android/c++/JHybridZeticAgentSpec.cpp
 )
 
 # From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake

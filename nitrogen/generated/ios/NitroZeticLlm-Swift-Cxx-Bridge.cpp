@@ -8,6 +8,7 @@
 #include "NitroZeticLlm-Swift-Cxx-Bridge.hpp"
 
 // Include C++ implementation defined types
+#include "HybridZeticAgentSpecSwift.hpp"
 #include "HybridZeticLLMModelSpecSwift.hpp"
 #include "HybridZeticLLMSpecSwift.hpp"
 #include "NitroZeticLlm-Swift-Cxx-Umbrella.hpp"
@@ -92,6 +93,38 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     }
     #endif
     NitroZeticLlm::HybridZeticLLMSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
+    return swiftPart.toUnsafe();
+  }
+  
+  // pragma MARK: std::function<void(const std::string& /* result */)>
+  Func_void_std__string create_Func_void_std__string(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroZeticLlm::Func_void_std__string::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::string& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const AgentEvent& /* event */)>
+  Func_void_AgentEvent create_Func_void_AgentEvent(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroZeticLlm::Func_void_AgentEvent::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const AgentEvent& event) mutable -> void {
+      swiftClosure.call(event);
+    };
+  }
+  
+  // pragma MARK: std::shared_ptr<HybridZeticAgentSpec>
+  std::shared_ptr<HybridZeticAgentSpec> create_std__shared_ptr_HybridZeticAgentSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
+    NitroZeticLlm::HybridZeticAgentSpec_cxx swiftPart = NitroZeticLlm::HybridZeticAgentSpec_cxx::fromUnsafe(swiftUnsafePointer);
+    return std::make_shared<margelo::nitro::zeticllm::HybridZeticAgentSpecSwift>(swiftPart);
+  }
+  void* NON_NULL get_std__shared_ptr_HybridZeticAgentSpec_(std__shared_ptr_HybridZeticAgentSpec_ cppType) {
+    std::shared_ptr<margelo::nitro::zeticllm::HybridZeticAgentSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::zeticllm::HybridZeticAgentSpecSwift>(cppType);
+    #ifdef NITRO_DEBUG
+    if (swiftWrapper == nullptr) [[unlikely]] {
+      throw std::runtime_error("Class \"HybridZeticAgentSpec\" is not implemented in Swift!");
+    }
+    #endif
+    NitroZeticLlm::HybridZeticAgentSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
 

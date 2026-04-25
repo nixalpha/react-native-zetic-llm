@@ -22,6 +22,22 @@
         "language": "kotlin",
         "implementationClassName": "HybridZeticLLM"
       }
+    },
+    "ZeticAgent": {
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "HybridZeticAgent"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "HybridZeticAgent"
+      }
+    },
+    "ZeticAgentShadowTree": {
+      "all": {
+        "language": "c++",
+        "implementationClassName": "HybridZeticAgentShadowTree"
+      }
     }
   },
   "ignorePaths": [

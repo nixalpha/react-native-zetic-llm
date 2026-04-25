@@ -19,7 +19,10 @@
 #include "JFunc_void_TokenEvent.hpp"
 #include "JHybridZeticLLMSpec.hpp"
 #include "JFunc_void_double.hpp"
+#include "JHybridZeticAgentSpec.hpp"
+#include "JFunc_void_AgentEvent.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
+#include "HybridZeticAgentShadowTree.hpp"
 
 namespace margelo::nitro::zeticllm {
 
@@ -37,6 +40,14 @@ struct JHybridZeticLLMSpecImpl: public jni::JavaClass<JHybridZeticLLMSpecImpl, J
     return javaPart->getJHybridZeticLLMSpec();
   }
 };
+struct JHybridZeticAgentSpecImpl: public jni::JavaClass<JHybridZeticAgentSpecImpl, JHybridZeticAgentSpec::JavaPart> {
+  static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/zeticllm/HybridZeticAgent;";
+  static std::shared_ptr<JHybridZeticAgentSpec> create() {
+    static const auto constructorFn = javaClassStatic()->getConstructor<JHybridZeticAgentSpecImpl::javaobject()>();
+    jni::local_ref<JHybridZeticAgentSpec::JavaPart> javaPart = javaClassStatic()->newObject(constructorFn);
+    return javaPart->getJHybridZeticAgentSpec();
+  }
+};
 
 void registerAllNatives() {
   using namespace margelo::nitro;
@@ -47,12 +58,29 @@ void registerAllNatives() {
   margelo::nitro::zeticllm::JFunc_void_TokenEvent_cxx::registerNatives();
   margelo::nitro::zeticllm::JHybridZeticLLMSpec::CxxPart::registerNatives();
   margelo::nitro::zeticllm::JFunc_void_double_cxx::registerNatives();
+  margelo::nitro::zeticllm::JHybridZeticAgentSpec::CxxPart::registerNatives();
+  margelo::nitro::zeticllm::JFunc_void_AgentEvent_cxx::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(
     "ZeticLLM",
     []() -> std::shared_ptr<HybridObject> {
       return JHybridZeticLLMSpecImpl::create();
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "ZeticAgent",
+    []() -> std::shared_ptr<HybridObject> {
+      return JHybridZeticAgentSpecImpl::create();
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "ZeticAgentShadowTree",
+    []() -> std::shared_ptr<HybridObject> {
+      static_assert(std::is_default_constructible_v<HybridZeticAgentShadowTree>,
+                    "The HybridObject \"HybridZeticAgentShadowTree\" is not default-constructible! "
+                    "Create a public constructor that takes zero arguments to be able to autolink this HybridObject.");
+      return std::make_shared<HybridZeticAgentShadowTree>();
     }
   );
 }

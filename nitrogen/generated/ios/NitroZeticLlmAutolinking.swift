@@ -23,4 +23,16 @@ public final class NitroZeticLlmAutolinking {
   public static func isZeticLLMRecyclable() -> Bool {
     return HybridZeticLLM.self is any RecyclableView.Type
   }
+  
+  public static func createZeticAgent() -> bridge.std__shared_ptr_HybridZeticAgentSpec_ {
+    let hybridObject = HybridZeticAgent()
+    return { () -> bridge.std__shared_ptr_HybridZeticAgentSpec_ in
+      let __cxxWrapped = hybridObject.getCxxWrapper()
+      return __cxxWrapped.getCxxPart()
+    }()
+  }
+  
+  public static func isZeticAgentRecyclable() -> Bool {
+    return HybridZeticAgent.self is any RecyclableView.Type
+  }
 }
