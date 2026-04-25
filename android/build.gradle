@@ -141,5 +141,5 @@ dependencies {
 
   // Add a dependency on NitroModules
   implementation project(":react-native-nitro-modules")
-  implementation "com.zeticai.mlange:mlange:+"
+  implementation "com.zeticai.mlange:mlange:${getExtOrDefault("zeticMlangeVersion")}"
 }

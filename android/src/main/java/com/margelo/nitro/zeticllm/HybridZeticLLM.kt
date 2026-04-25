@@ -1,5 +1,6 @@
 package com.margelo.nitro.zeticllm
 
+import android.os.SystemClock
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.core.Promise
 import com.zeticai.mlange.*
@@ -18,9 +19,7 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       val version = config.version?.toInt()
       val initOption = makeInitOption(config.initOption)
       val cachePolicy = makeCachePolicy(config.cacheHandlingPolicy)
-      val progress: ((Float) -> Unit)? = onDownload?.let { callback ->
-        { value: Float -> callback(value.toDouble()) }
-      }
+      val progress = makeProgressCallback(onDownload)
 
       val model = config.explicitRuntime?.let { explicit ->
         ZeticMLangeLLMModel(
@@ -52,6 +51,41 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
   }
 
   private fun normalize(value: String?): String = value?.trim()?.uppercase() ?: ""
+
+  private fun makeProgressCallback(onDownload: ((Double) -> Unit)?): ((Float) -> Unit)? {
+    if (onDownload == null) return null
+
+    val lock = Any()
+    var lastProgress = Double.NaN
+    var lastEmittedAt = 0L
+
+    return { value: Float ->
+      val progress = value.toDouble().coerceIn(0.0, 1.0)
+      val now = SystemClock.uptimeMillis()
+      val shouldEmit = synchronized(lock) {
+        val isFirst = lastProgress.isNaN()
+        val isBoundary = progress == 0.0 || progress == 1.0
+        val changedEnough = isFirst || kotlin.math.abs(progress - lastProgress) >= 0.01
+        val waitedEnough = now - lastEmittedAt >= 250
+
+        when {
+          isFirst -> true
+          isBoundary && progress != lastProgress -> true
+          changedEnough && waitedEnough -> true
+          else -> false
+        }.also { emit ->
+          if (emit) {
+            lastProgress = progress
+            lastEmittedAt = now
+          }
+        }
+      }
+
+      if (shouldEmit) {
+        onDownload(progress)
+      }
+    }
+  }
 
   private fun makeModelMode(value: String?): LLMModelMode =
     when (normalize(value)) {
