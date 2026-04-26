@@ -45,8 +45,8 @@ namespace margelo::nitro::zeticllm {
       jni::local_ref<jni::JString> layout = this->getFieldValue(fieldLayout);
       static const auto fieldMean = clazz->getField<jni::JArrayDouble>("mean");
       jni::local_ref<jni::JArrayDouble> mean = this->getFieldValue(fieldMean);
-      static const auto fieldStd = clazz->getField<jni::JArrayDouble>("std");
-      jni::local_ref<jni::JArrayDouble> std = this->getFieldValue(fieldStd);
+      static const auto fieldStdValues = clazz->getField<jni::JArrayDouble>("stdValues");
+      jni::local_ref<jni::JArrayDouble> stdValues = this->getFieldValue(fieldStdValues);
       return NativeImagePreprocessConfig(
         width,
         height,
@@ -59,10 +59,10 @@ namespace margelo::nitro::zeticllm {
           mean->getRegion(0, __size, __vector.data());
           return __vector;
         }()) : std::nullopt,
-        std != nullptr ? std::make_optional([&]() {
-          size_t __size = std->size();
+        stdValues != nullptr ? std::make_optional([&]() {
+          size_t __size = stdValues->size();
           std::vector<double> __vector(__size);
-          std->getRegion(0, __size, __vector.data());
+          stdValues->getRegion(0, __size, __vector.data());
           return __vector;
         }()) : std::nullopt
       );
@@ -90,10 +90,10 @@ namespace margelo::nitro::zeticllm {
           __array->setRegion(0, __size, value.mean.value().data());
           return __array;
         }() : nullptr,
-        value.std.has_value() ? [&]() {
-          size_t __size = value.std.value().size();
+        value.stdValues.has_value() ? [&]() {
+          size_t __size = value.stdValues.value().size();
           jni::local_ref<jni::JArrayDouble> __array = jni::JArrayDouble::newArray(__size);
-          __array->setRegion(0, __size, value.std.value().data());
+          __array->setRegion(0, __size, value.stdValues.value().data());
           return __array;
         }() : nullptr
       );

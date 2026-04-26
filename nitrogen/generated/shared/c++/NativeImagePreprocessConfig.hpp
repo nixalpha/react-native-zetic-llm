@@ -47,11 +47,11 @@ namespace margelo::nitro::zeticllm {
     std::optional<std::string> colorOrder     SWIFT_PRIVATE;
     std::optional<std::string> layout     SWIFT_PRIVATE;
     std::optional<std::vector<double>> mean     SWIFT_PRIVATE;
-    std::optional<std::vector<double>> std     SWIFT_PRIVATE;
+    std::optional<std::vector<double>> stdValues     SWIFT_PRIVATE;
 
   public:
     NativeImagePreprocessConfig() = default;
-    explicit NativeImagePreprocessConfig(double width, double height, std::optional<std::string> resizeMode, std::optional<std::string> colorOrder, std::optional<std::string> layout, std::optional<std::vector<double>> mean, std::optional<std::vector<double>> std): width(width), height(height), resizeMode(resizeMode), colorOrder(colorOrder), layout(layout), mean(mean), std(std) {}
+    explicit NativeImagePreprocessConfig(double width, double height, std::optional<std::string> resizeMode, std::optional<std::string> colorOrder, std::optional<std::string> layout, std::optional<std::vector<double>> mean, std::optional<std::vector<double>> stdValues): width(width), height(height), resizeMode(resizeMode), colorOrder(colorOrder), layout(layout), mean(mean), stdValues(stdValues) {}
 
   public:
     friend bool operator==(const NativeImagePreprocessConfig& lhs, const NativeImagePreprocessConfig& rhs) = default;
@@ -73,7 +73,7 @@ namespace margelo::nitro {
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "colorOrder"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "layout"))),
         JSIConverter<std::optional<std::vector<double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "mean"))),
-        JSIConverter<std::optional<std::vector<double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "std")))
+        JSIConverter<std::optional<std::vector<double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stdValues")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::zeticllm::NativeImagePreprocessConfig& arg) {
@@ -84,7 +84,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "colorOrder"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.colorOrder));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "layout"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.layout));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "mean"), JSIConverter<std::optional<std::vector<double>>>::toJSI(runtime, arg.mean));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "std"), JSIConverter<std::optional<std::vector<double>>>::toJSI(runtime, arg.std));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "stdValues"), JSIConverter<std::optional<std::vector<double>>>::toJSI(runtime, arg.stdValues));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -101,7 +101,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "colorOrder")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "layout")))) return false;
       if (!JSIConverter<std::optional<std::vector<double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "mean")))) return false;
-      if (!JSIConverter<std::optional<std::vector<double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "std")))) return false;
+      if (!JSIConverter<std::optional<std::vector<double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stdValues")))) return false;
       return true;
     }
   };

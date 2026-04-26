@@ -18,7 +18,7 @@ public extension NativeImagePreprocessConfig {
   /**
    * Create a new instance of `NativeImagePreprocessConfig`.
    */
-  init(width: Double, height: Double, resizeMode: String?, colorOrder: String?, layout: String?, mean: [Double]?, std: [Double]?) {
+  init(width: Double, height: Double, resizeMode: String?, colorOrder: String?, layout: String?, mean: [Double]?, stdValues: [Double]?) {
     self.init(width, height, { () -> bridge.std__optional_std__string_ in
       if let __unwrappedValue = resizeMode {
         return bridge.create_std__optional_std__string_(std.string(__unwrappedValue))
@@ -50,7 +50,7 @@ public extension NativeImagePreprocessConfig {
         return .init()
       }
     }(), { () -> bridge.std__optional_std__vector_double__ in
-      if let __unwrappedValue = std {
+      if let __unwrappedValue = stdValues {
         return bridge.create_std__optional_std__vector_double__({ () -> bridge.std__vector_double_ in
           var __vector = bridge.create_std__vector_double_(__unwrappedValue.count)
           for __item in __unwrappedValue {
@@ -129,10 +129,10 @@ public extension NativeImagePreprocessConfig {
   }
   
   @inline(__always)
-  var std: [Double]? {
+  var stdValues: [Double]? {
     return { () -> [Double]? in
-      if bridge.has_value_std__optional_std__vector_double__(self.__std) {
-        let __unwrapped = bridge.get_std__optional_std__vector_double__(self.__std)
+      if bridge.has_value_std__optional_std__vector_double__(self.__stdValues) {
+        let __unwrapped = bridge.get_std__optional_std__vector_double__(self.__stdValues)
         var __array: [Double] = []
         let __count = Int(__unwrapped.size())
         __array.reserveCapacity(__count)

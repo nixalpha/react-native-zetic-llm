@@ -447,7 +447,7 @@ private extension NativeMediaInput {
     let order = (preprocess.colorOrder ?? "rgb").lowercased() == "bgr" ? [2, 1, 0] : [0, 1, 2]
     let layout = (preprocess.layout ?? "nchw").lowercased()
     let mean = (preprocess.mean ?? [0, 0, 0]).map(Float.init)
-    let std = (preprocess.std ?? [1, 1, 1]).map(Float.init)
+    let std = (preprocess.stdValues ?? [1, 1, 1]).map(Float.init)
     let pixelCount = targetWidth * targetHeight
 
     switch encoder.inputDataType.lowercased() {

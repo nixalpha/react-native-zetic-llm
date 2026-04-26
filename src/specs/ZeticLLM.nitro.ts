@@ -54,7 +54,7 @@ export interface NativeImagePreprocessConfig {
   colorOrder?: string
   layout?: string
   mean?: number[]
-  std?: number[]
+  stdValues?: number[]
 }
 
 export interface NativePromptEmbeddingBlock {

@@ -38,7 +38,7 @@ data class NativeImagePreprocessConfig(
   val mean: DoubleArray?,
   @DoNotStrip
   @Keep
-  val std: DoubleArray?
+  val stdValues: DoubleArray?
 ) {
   /* primary constructor */
 
@@ -51,7 +51,7 @@ data class NativeImagePreprocessConfig(
       && Objects.deepEquals(this.colorOrder, other.colorOrder)
       && Objects.deepEquals(this.layout, other.layout)
       && Objects.deepEquals(this.mean, other.mean)
-      && Objects.deepEquals(this.std, other.std)
+      && Objects.deepEquals(this.stdValues, other.stdValues)
   }
 
   override fun hashCode(): Int {
@@ -62,7 +62,7 @@ data class NativeImagePreprocessConfig(
       colorOrder,
       layout,
       mean,
-      std
+      stdValues
     ).contentDeepHashCode()
   }
 
@@ -74,8 +74,8 @@ data class NativeImagePreprocessConfig(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(width: Double, height: Double, resizeMode: String?, colorOrder: String?, layout: String?, mean: DoubleArray?, std: DoubleArray?): NativeImagePreprocessConfig {
-      return NativeImagePreprocessConfig(width, height, resizeMode, colorOrder, layout, mean, std)
+    private fun fromCpp(width: Double, height: Double, resizeMode: String?, colorOrder: String?, layout: String?, mean: DoubleArray?, stdValues: DoubleArray?): NativeImagePreprocessConfig {
+      return NativeImagePreprocessConfig(width, height, resizeMode, colorOrder, layout, mean, stdValues)
     }
   }
 }

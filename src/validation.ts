@@ -84,7 +84,7 @@ export interface ImagePreprocessConfig {
   colorOrder?: ImageColorOrder
   layout?: ImageLayout
   mean?: number[]
-  std?: number[]
+  stdValues?: number[]
 }
 
 export type PromptEmbeddingBlock =
@@ -318,7 +318,7 @@ export function validateImagePreprocessConfig(
   assertEnum(config.colorOrder, IMAGE_COLOR_ORDERS, 'imagePreprocess.colorOrder')
   assertEnum(config.layout, IMAGE_LAYOUTS, 'imagePreprocess.layout')
   assertNumberArray(config.mean, 'imagePreprocess.mean')
-  assertNumberArray(config.std, 'imagePreprocess.std')
+  assertNumberArray(config.stdValues, 'imagePreprocess.stdValues')
 
   return config
 }

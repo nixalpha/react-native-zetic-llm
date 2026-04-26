@@ -506,7 +506,7 @@ class HybridZeticLLMModel(
     }
     val layout = (preprocess.layout ?: "nchw").lowercase()
     val mean = preprocess.mean?.map { it.toFloat() }?.toFloatArray() ?: floatArrayOf(0f, 0f, 0f)
-    val std = preprocess.std?.map { it.toFloat() }?.toFloatArray() ?: floatArrayOf(1f, 1f, 1f)
+    val std = preprocess.stdValues?.map { it.toFloat() }?.toFloatArray() ?: floatArrayOf(1f, 1f, 1f)
     val dataType = encoder.inputDataType.lowercase()
     val pixelCount = targetWidth * targetHeight
 
