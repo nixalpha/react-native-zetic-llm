@@ -11,6 +11,7 @@ import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.core.Promise
+import com.margelo.nitro.core.ArrayBuffer
 import com.margelo.nitro.core.HybridObject
 
 /**
@@ -37,6 +38,40 @@ abstract class HybridZeticLLMModelSpec: HybridObject() {
     val __result = generate(prompt, onToken?.let { it })
     return __result
   }
+  
+  abstract fun generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: ((event: TokenEvent) -> Unit)?): Promise<GenerateResult>
+  
+  @DoNotStrip
+  @Keep
+  private fun generateMultimodal_cxx(config: NativeMultimodalGenerateConfig, onToken: Func_void_TokenEvent?): Promise<GenerateResult> {
+    val __result = generateMultimodal(config, onToken?.let { it })
+    return __result
+  }
+  
+  abstract fun runWithEmbeddings(embeddings: ArrayBuffer, onToken: ((event: TokenEvent) -> Unit)?): Promise<GenerateResult>
+  
+  @DoNotStrip
+  @Keep
+  private fun runWithEmbeddings_cxx(embeddings: ArrayBuffer, onToken: Func_void_TokenEvent?): Promise<GenerateResult> {
+    val __result = runWithEmbeddings(embeddings, onToken?.let { it })
+    return __result
+  }
+  
+  @DoNotStrip
+  @Keep
+  abstract fun tokenize(text: String, parseSpecial: Boolean?): Promise<DoubleArray>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun tokenEmbeddings(tokenIds: DoubleArray): Promise<ArrayBuffer>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun specialTokenId(name: String): Promise<Double>
+  
+  @DoNotStrip
+  @Keep
+  abstract fun validateMultimodalProfile(profile: NativeMultimodalProfile): Promise<Unit>
   
   @DoNotStrip
   @Keep

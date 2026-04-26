@@ -15,6 +15,12 @@ namespace margelo::nitro::zeticllm {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("generate", &HybridZeticLLMModelSpec::generate);
+      prototype.registerHybridMethod("generateMultimodal", &HybridZeticLLMModelSpec::generateMultimodal);
+      prototype.registerHybridMethod("runWithEmbeddings", &HybridZeticLLMModelSpec::runWithEmbeddings);
+      prototype.registerHybridMethod("tokenize", &HybridZeticLLMModelSpec::tokenize);
+      prototype.registerHybridMethod("tokenEmbeddings", &HybridZeticLLMModelSpec::tokenEmbeddings);
+      prototype.registerHybridMethod("specialTokenId", &HybridZeticLLMModelSpec::specialTokenId);
+      prototype.registerHybridMethod("validateMultimodalProfile", &HybridZeticLLMModelSpec::validateMultimodalProfile);
       prototype.registerHybridMethod("cleanUp", &HybridZeticLLMModelSpec::cleanUp);
       prototype.registerHybridMethod("release", &HybridZeticLLMModelSpec::release);
     });

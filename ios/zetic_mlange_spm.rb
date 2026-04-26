@@ -2,7 +2,7 @@ require 'xcodeproj'
 
 module ReactNativeZeticLLM
   ZETIC_MLANGE_PACKAGE_URL = 'https://github.com/zetic-ai/ZeticMLangeiOS.git'
-  ZETIC_MLANGE_VERSION = '1.6.0'
+  ZETIC_MLANGE_VERSION = '1.7.0-beta.1'
   ZETIC_MLANGE_PRODUCT = 'ZeticMLange'
   POD_TARGET_NAME = 'NitroZeticLlm'
 

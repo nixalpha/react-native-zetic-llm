@@ -28,7 +28,7 @@ post_install do |installer|
 end
 ```
 
-The helper pins `https://github.com/zetic-ai/ZeticMLangeiOS.git` to exact version `1.6.0`, links the `ZeticMLange` product, and keeps the dependency in sync on each `pod install`. ZeticMLangeiOS `1.6.0` requires iOS 16.0, so the consuming app must use an iOS deployment target of 16.0 or newer.
+The helper pins `https://github.com/zetic-ai/ZeticMLangeiOS.git` to exact version `1.7.0-beta.1`, links the `ZeticMLange` product, and keeps the dependency in sync on each `pod install`. ZeticMLangeiOS requires iOS 16.0, so the consuming app must use an iOS deployment target of 16.0 or newer.
 
 ## Android Setup
 
@@ -77,6 +77,64 @@ await model.cleanUp()
 model.release()
 ```
 
+### Multimodal Embedding Injection
+
+Multimodal support uses ZeticMLange `1.7.0-beta.1` and the SDK's `runWithEmbeddings` path. The low-level APIs are available on the loaded model:
+
+```ts
+const ids = await model.tokenize('<|im_start|>user\n', true)
+const textEmbeddings = await model.tokenEmbeddings(ids)
+const tokenId = await model.specialTokenId('<|audio_bos|>')
+
+await model.validateMultimodalProfile({
+  name: 'qwen-omni-audio',
+  requiredSpecialTokens: ['<|audio_bos|>', '<|audio_eos|>', '<|im_start|>', '<|im_end|>'],
+})
+
+const result = await model.runWithEmbeddings(textEmbeddings, ({ token }) => {
+  console.log(token)
+})
+```
+
+For full audio/image flows, provide app-owned media inputs and encoder configs. Audio supports PCM buffers directly and PCM WAV `uri`/`bytes` inputs; image supports decoded `uri`/`bytes` inputs and raw `rgb8`/`rgba8` pixel buffers.
+
+```ts
+const result = await model.generateMultimodal(
+  {
+    profile: {
+      name: 'qwen-omni-audio',
+      requiredSpecialTokens: ['<|audio_bos|>', '<|audio_eos|>', '<|im_start|>', '<|im_end|>'],
+    },
+    audioEncoder: {
+      model: {
+        personalKey: 'dev_...',
+        name: 'zetic/qwen2.5_omni_audio_encoder_chunk_f16',
+        modelMode: 'RUN_AUTO',
+      },
+      inputShape: [1, 128, 200],
+      inputDataType: 'float32',
+    },
+    audioPreprocess: 'qwen-omni-audio',
+    blocks: [
+      { type: 'text', text: '<|im_start|>user\n<|audio_bos|>', parseSpecial: true },
+      {
+        type: 'audio',
+        id: 'clip',
+        input: {
+          type: 'pcm',
+          data: pcmFloat32.buffer,
+          sampleRate: 16000,
+          channels: 1,
+          format: 'float32',
+        },
+      },
+      { type: 'text', text: '<|audio_eos|>What do you hear?<|im_end|>\n<|im_start|>assistant\n', parseSpecial: true },
+    ],
+  },
+  ({ token }) => console.log(token)
+)
+```
+
 ## API
 
 ```ts
@@ -112,3 +170,4 @@ interface LoadModelConfig {
 - `release()` is idempotent and frees the native model. Future generation/cleanup calls reject with `MODEL_RELEASED`.
 - The convenience `loadModel()` validates configuration before crossing the native boundary.
 - Sampling options are intentionally not exposed because the referenced Zetic APIs document prompt execution and token consumption only.
+- Multimodal embedding injection is beta in ZeticMLange `1.7.0-beta.1` and is currently supported by Zetic only on the llama.cpp LLM backend.

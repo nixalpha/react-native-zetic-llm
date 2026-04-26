@@ -16,10 +16,22 @@ namespace margelo::nitro::zeticllm { class HybridZeticLLMModelSpec; }
 namespace margelo::nitro::zeticllm { class HybridZeticLLMSpec; }
 // Forward declaration of `NativeExplicitRuntimeConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
+// Forward declaration of `NativeImagePreprocessConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeImagePreprocessConfig; }
 // Forward declaration of `NativeLLMInitOption` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
 // Forward declaration of `NativeLoadModelConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
+// Forward declaration of `NativeMediaInput` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
+// Forward declaration of `NativeMultimodalEncoderConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalEncoderConfig; }
+// Forward declaration of `NativeMultimodalGenerateConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalGenerateConfig; }
+// Forward declaration of `NativeMultimodalProfile` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalProfile; }
+// Forward declaration of `NativePromptEmbeddingBlock` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativePromptEmbeddingBlock; }
 // Forward declaration of `TokenEvent` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
 
@@ -28,9 +40,16 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include "HybridZeticLLMModelSpec.hpp"
 #include "HybridZeticLLMSpec.hpp"
 #include "NativeExplicitRuntimeConfig.hpp"
+#include "NativeImagePreprocessConfig.hpp"
 #include "NativeLLMInitOption.hpp"
 #include "NativeLoadModelConfig.hpp"
+#include "NativeMediaInput.hpp"
+#include "NativeMultimodalEncoderConfig.hpp"
+#include "NativeMultimodalGenerateConfig.hpp"
+#include "NativeMultimodalProfile.hpp"
+#include "NativePromptEmbeddingBlock.hpp"
 #include "TokenEvent.hpp"
+#include <NitroModules/ArrayBuffer.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
@@ -38,6 +57,7 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 // C++ helpers for Swift
 #include "NitroZeticLlm-Swift-Cxx-Bridge.hpp"

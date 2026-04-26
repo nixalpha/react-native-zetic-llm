@@ -156,6 +156,157 @@ open class HybridZeticLLMModelSpec_cxx {
   }
   
   @inline(__always)
+  public final func generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: bridge.std__optional_std__function_void_const_TokenEvent_____event______) -> bridge.Result_std__shared_ptr_Promise_GenerateResult___ {
+    do {
+      let __result = try self.__implementation.generateMultimodal(config: config, onToken: { () -> ((_ event: TokenEvent) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_TokenEvent_____event______(onToken) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_TokenEvent_____event______(onToken)
+          return { () -> (TokenEvent) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_TokenEvent(__unwrapped)
+            return { (__event: TokenEvent) -> Void in
+              __wrappedFunction.call(__event)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_GenerateResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_GenerateResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_GenerateResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_GenerateResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_GenerateResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func runWithEmbeddings(embeddings: ArrayBuffer, onToken: bridge.std__optional_std__function_void_const_TokenEvent_____event______) -> bridge.Result_std__shared_ptr_Promise_GenerateResult___ {
+    do {
+      let __result = try self.__implementation.runWithEmbeddings(embeddings: embeddings, onToken: { () -> ((_ event: TokenEvent) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_TokenEvent_____event______(onToken) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_TokenEvent_____event______(onToken)
+          return { () -> (TokenEvent) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_TokenEvent(__unwrapped)
+            return { (__event: TokenEvent) -> Void in
+              __wrappedFunction.call(__event)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_GenerateResult__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_GenerateResult__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_GenerateResult__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_GenerateResult___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_GenerateResult___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func tokenize(text: std.string, parseSpecial: bridge.std__optional_bool_) -> bridge.Result_std__shared_ptr_Promise_std__vector_double____ {
+    do {
+      let __result = try self.__implementation.tokenize(text: String(text), parseSpecial: { () -> Bool? in
+        if bridge.has_value_std__optional_bool_(parseSpecial) {
+          let __unwrapped = bridge.get_std__optional_bool_(parseSpecial)
+          return __unwrapped
+        } else {
+          return nil
+        }
+      }())
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__vector_double___ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__vector_double___()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__vector_double___(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve({ () -> bridge.std__vector_double_ in
+              var __vector = bridge.create_std__vector_double_(__result.count)
+              for __item in __result {
+                __vector.push_back(__item)
+              }
+              return __vector
+            }()) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_double____(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__vector_double____(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func tokenEmbeddings(tokenIds: bridge.std__vector_double_) -> bridge.Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____ {
+    do {
+      let __result = try self.__implementation.tokenEmbeddings(tokenIds: tokenIds.map({ __item in __item }))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result.getArrayBuffer()) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func specialTokenId(name: std.string) -> bridge.Result_std__shared_ptr_Promise_double___ {
+    do {
+      let __result = try self.__implementation.specialTokenId(name: String(name))
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_double__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_double__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_double__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_double___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_double___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
+  public final func validateMultimodalProfile(profile: NativeMultimodalProfile) -> bridge.Result_std__shared_ptr_Promise_void___ {
+    do {
+      let __result = try self.__implementation.validateMultimodalProfile(profile: profile)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_void__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_void__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_void__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve() })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
+    }
+  }
+  
+  @inline(__always)
   public final func cleanUp() -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
       let __result = try self.__implementation.cleanUp()

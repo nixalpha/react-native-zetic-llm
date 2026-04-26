@@ -63,7 +63,7 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       }
 
       Log.d(TAG, "loadModel: model initialized for ${config.name}")
-      HybridZeticLLMModel(model)
+      HybridZeticLLMModel(model, config)
     }
   }
 

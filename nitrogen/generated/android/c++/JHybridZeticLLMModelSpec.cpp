@@ -11,12 +11,33 @@
 namespace margelo::nitro::zeticllm { struct GenerateResult; }
 // Forward declaration of `TokenEvent` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
+// Forward declaration of `NativeMultimodalGenerateConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalGenerateConfig; }
+// Forward declaration of `NativeMultimodalProfile` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalProfile; }
+// Forward declaration of `NativeMultimodalEncoderConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalEncoderConfig; }
+// Forward declaration of `NativeLoadModelConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
+// Forward declaration of `NativeLLMInitOption` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
+// Forward declaration of `NativeExplicitRuntimeConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
+// Forward declaration of `NativeImagePreprocessConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeImagePreprocessConfig; }
+// Forward declaration of `NativePromptEmbeddingBlock` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativePromptEmbeddingBlock; }
+// Forward declaration of `NativeMediaInput` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
 
 #include "GenerateResult.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JGenerateResult.hpp"
 #include <string>
+#include <vector>
+#include <NitroModules/ArrayBuffer.hpp>
+#include <NitroModules/JArrayBuffer.hpp>
 #include <NitroModules/JUnit.hpp>
 #include "TokenEvent.hpp"
 #include <functional>
@@ -24,6 +45,24 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include "JFunc_void_TokenEvent.hpp"
 #include <NitroModules/JNICallable.hpp>
 #include "JTokenEvent.hpp"
+#include "NativeMultimodalGenerateConfig.hpp"
+#include "JNativeMultimodalGenerateConfig.hpp"
+#include "NativeMultimodalProfile.hpp"
+#include "JNativeMultimodalProfile.hpp"
+#include "NativeMultimodalEncoderConfig.hpp"
+#include "JNativeMultimodalEncoderConfig.hpp"
+#include "NativeLoadModelConfig.hpp"
+#include "JNativeLoadModelConfig.hpp"
+#include "NativeLLMInitOption.hpp"
+#include "JNativeLLMInitOption.hpp"
+#include "NativeExplicitRuntimeConfig.hpp"
+#include "JNativeExplicitRuntimeConfig.hpp"
+#include "NativeImagePreprocessConfig.hpp"
+#include "JNativeImagePreprocessConfig.hpp"
+#include "NativePromptEmbeddingBlock.hpp"
+#include "JNativePromptEmbeddingBlock.hpp"
+#include "NativeMediaInput.hpp"
+#include "JNativeMediaInput.hpp"
 
 namespace margelo::nitro::zeticllm {
 
@@ -66,6 +105,111 @@ namespace margelo::nitro::zeticllm {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<JGenerateResult>(__boxedResult);
         __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<GenerateResult>> JHybridZeticLLMModelSpec::generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeMultimodalGenerateConfig> /* config */, jni::alias_ref<JFunc_void_TokenEvent::javaobject> /* onToken */)>("generateMultimodal_cxx");
+    auto __result = method(_javaPart, JNativeMultimodalGenerateConfig::fromCpp(config), onToken.has_value() ? JFunc_void_TokenEvent_cxx::fromCpp(onToken.value()) : nullptr);
+    return [&]() {
+      auto __promise = Promise<GenerateResult>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JGenerateResult>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<GenerateResult>> JHybridZeticLLMModelSpec::runWithEmbeddings(const std::shared_ptr<ArrayBuffer>& embeddings, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JArrayBuffer::javaobject> /* embeddings */, jni::alias_ref<JFunc_void_TokenEvent::javaobject> /* onToken */)>("runWithEmbeddings_cxx");
+    auto __result = method(_javaPart, JArrayBuffer::wrap(embeddings), onToken.has_value() ? JFunc_void_TokenEvent_cxx::fromCpp(onToken.value()) : nullptr);
+    return [&]() {
+      auto __promise = Promise<GenerateResult>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JGenerateResult>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::vector<double>>> JHybridZeticLLMModelSpec::tokenize(const std::string& text, std::optional<bool> parseSpecial) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* text */, jni::alias_ref<jni::JBoolean> /* parseSpecial */)>("tokenize");
+    auto __result = method(_javaPart, jni::make_jstring(text), parseSpecial.has_value() ? jni::JBoolean::valueOf(parseSpecial.value()) : nullptr);
+    return [&]() {
+      auto __promise = Promise<std::vector<double>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JArrayDouble>(__boxedResult);
+        __promise->resolve([&]() {
+          size_t __size = __result->size();
+          std::vector<double> __vector(__size);
+          __result->getRegion(0, __size, __vector.data());
+          return __vector;
+        }());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> JHybridZeticLLMModelSpec::tokenEmbeddings(const std::vector<double>& tokenIds) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JArrayDouble> /* tokenIds */)>("tokenEmbeddings");
+    auto __result = method(_javaPart, [&]() {
+      size_t __size = tokenIds.size();
+      jni::local_ref<jni::JArrayDouble> __array = jni::JArrayDouble::newArray(__size);
+      __array->setRegion(0, __size, tokenIds.data());
+      return __array;
+    }());
+    return [&]() {
+      auto __promise = Promise<std::shared_ptr<ArrayBuffer>>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JArrayBuffer::javaobject>(__boxedResult);
+        __promise->resolve(__result->cthis()->getArrayBuffer());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<double>> JHybridZeticLLMModelSpec::specialTokenId(const std::string& name) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<jni::JString> /* name */)>("specialTokenId");
+    auto __result = method(_javaPart, jni::make_jstring(name));
+    return [&]() {
+      auto __promise = Promise<double>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JDouble>(__boxedResult);
+        __promise->resolve(__result->value());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridZeticLLMModelSpec::validateMultimodalProfile(const NativeMultimodalProfile& profile) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeMultimodalProfile> /* profile */)>("validateMultimodalProfile");
+    auto __result = method(_javaPart, JNativeMultimodalProfile::fromCpp(profile));
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

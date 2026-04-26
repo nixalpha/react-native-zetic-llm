@@ -14,6 +14,12 @@ public protocol HybridZeticLLMModelSpec_protocol: HybridObject {
 
   // Methods
   func generate(prompt: String, onToken: ((_ event: TokenEvent) -> Void)?) throws -> Promise<GenerateResult>
+  func generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: ((_ event: TokenEvent) -> Void)?) throws -> Promise<GenerateResult>
+  func runWithEmbeddings(embeddings: ArrayBuffer, onToken: ((_ event: TokenEvent) -> Void)?) throws -> Promise<GenerateResult>
+  func tokenize(text: String, parseSpecial: Bool?) throws -> Promise<[Double]>
+  func tokenEmbeddings(tokenIds: [Double]) throws -> Promise<ArrayBuffer>
+  func specialTokenId(name: String) throws -> Promise<Double>
+  func validateMultimodalProfile(profile: NativeMultimodalProfile) throws -> Promise<Void>
   func cleanUp() throws -> Promise<Void>
   func release() throws -> Void
 }

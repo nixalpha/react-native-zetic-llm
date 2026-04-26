@@ -16,6 +16,26 @@ namespace NitroZeticLlm { class HybridZeticLLMModelSpec_cxx; }
 namespace margelo::nitro::zeticllm { struct GenerateResult; }
 // Forward declaration of `TokenEvent` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
+// Forward declaration of `NativeMultimodalGenerateConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalGenerateConfig; }
+// Forward declaration of `NativeMultimodalProfile` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalProfile; }
+// Forward declaration of `NativeMultimodalEncoderConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalEncoderConfig; }
+// Forward declaration of `NativeLoadModelConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
+// Forward declaration of `NativeLLMInitOption` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
+// Forward declaration of `NativeExplicitRuntimeConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
+// Forward declaration of `NativeImagePreprocessConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeImagePreprocessConfig; }
+// Forward declaration of `NativePromptEmbeddingBlock` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativePromptEmbeddingBlock; }
+// Forward declaration of `NativeMediaInput` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
+// Forward declaration of `ArrayBufferHolder` to properly resolve imports.
+namespace NitroModules { class ArrayBufferHolder; }
 
 #include "GenerateResult.hpp"
 #include <NitroModules/Promise.hpp>
@@ -23,6 +43,18 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include "TokenEvent.hpp"
 #include <functional>
 #include <optional>
+#include "NativeMultimodalGenerateConfig.hpp"
+#include "NativeMultimodalProfile.hpp"
+#include <vector>
+#include "NativeMultimodalEncoderConfig.hpp"
+#include "NativeLoadModelConfig.hpp"
+#include "NativeLLMInitOption.hpp"
+#include "NativeExplicitRuntimeConfig.hpp"
+#include "NativeImagePreprocessConfig.hpp"
+#include "NativePromptEmbeddingBlock.hpp"
+#include "NativeMediaInput.hpp"
+#include <NitroModules/ArrayBuffer.hpp>
+#include <NitroModules/ArrayBufferHolder.hpp>
 
 #include "NitroZeticLlm-Swift-Cxx-Umbrella.hpp"
 
@@ -76,6 +108,54 @@ namespace margelo::nitro::zeticllm {
     // Methods
     inline std::shared_ptr<Promise<GenerateResult>> generate(const std::string& prompt, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) override {
       auto __result = _swiftPart.generate(prompt, onToken);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<GenerateResult>> generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) override {
+      auto __result = _swiftPart.generateMultimodal(std::forward<decltype(config)>(config), onToken);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<GenerateResult>> runWithEmbeddings(const std::shared_ptr<ArrayBuffer>& embeddings, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) override {
+      auto __result = _swiftPart.runWithEmbeddings(ArrayBufferHolder(embeddings), onToken);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::vector<double>>> tokenize(const std::string& text, std::optional<bool> parseSpecial) override {
+      auto __result = _swiftPart.tokenize(text, parseSpecial);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> tokenEmbeddings(const std::vector<double>& tokenIds) override {
+      auto __result = _swiftPart.tokenEmbeddings(tokenIds);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<double>> specialTokenId(const std::string& name) override {
+      auto __result = _swiftPart.specialTokenId(name);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> validateMultimodalProfile(const NativeMultimodalProfile& profile) override {
+      auto __result = _swiftPart.validateMultimodalProfile(std::forward<decltype(profile)>(profile));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

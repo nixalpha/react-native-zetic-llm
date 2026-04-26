@@ -39,6 +39,30 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const std::vector<double>& /* result */)>
+  Func_void_std__vector_double_ create_Func_void_std__vector_double_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroZeticLlm::Func_void_std__vector_double_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::vector<double>& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<ArrayBuffer>& /* result */)>
+  Func_void_std__shared_ptr_ArrayBuffer_ create_Func_void_std__shared_ptr_ArrayBuffer_(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroZeticLlm::Func_void_std__shared_ptr_ArrayBuffer_::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<ArrayBuffer>& result) mutable -> void {
+      swiftClosure.call(ArrayBufferHolder(result));
+    };
+  }
+  
+  // pragma MARK: std::function<void(double /* result */)>
+  Func_void_double create_Func_void_double(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroZeticLlm::Func_void_double::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](double result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+  
   // pragma MARK: std::function<void()>
   Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroZeticLlm::Func_void::fromUnsafe(swiftClosureWrapper);
@@ -68,14 +92,6 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     auto swiftClosure = NitroZeticLlm::Func_void_std__shared_ptr_HybridZeticLLMModelSpec_::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const std::shared_ptr<HybridZeticLLMModelSpec>& result) mutable -> void {
       swiftClosure.call(result);
-    };
-  }
-  
-  // pragma MARK: std::function<void(double /* progress */)>
-  Func_void_double create_Func_void_double(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroZeticLlm::Func_void_double::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](double progress) mutable -> void {
-      swiftClosure.call(progress);
     };
   }
   

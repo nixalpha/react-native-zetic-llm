@@ -41,7 +41,7 @@ final class HybridZeticLLM: HybridZeticLLMSpec {
         )
       }
 
-      return HybridZeticLLMModel(model: nativeModel)
+      return HybridZeticLLMModel(model: nativeModel, config: config)
     }
   }
 

@@ -8,6 +8,8 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `ArrayBufferHolder` to properly resolve imports.
+namespace NitroModules { class ArrayBufferHolder; }
 // Forward declaration of `GenerateResult` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct GenerateResult; }
 // Forward declaration of `HybridZeticLLMModelSpec` to properly resolve imports.
@@ -16,8 +18,18 @@ namespace margelo::nitro::zeticllm { class HybridZeticLLMModelSpec; }
 namespace margelo::nitro::zeticllm { class HybridZeticLLMSpec; }
 // Forward declaration of `NativeExplicitRuntimeConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
+// Forward declaration of `NativeImagePreprocessConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeImagePreprocessConfig; }
 // Forward declaration of `NativeLLMInitOption` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
+// Forward declaration of `NativeLoadModelConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
+// Forward declaration of `NativeMediaInput` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
+// Forward declaration of `NativeMultimodalEncoderConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalEncoderConfig; }
+// Forward declaration of `NativePromptEmbeddingBlock` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativePromptEmbeddingBlock; }
 // Forward declaration of `TokenEvent` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
 
@@ -32,8 +44,15 @@ namespace NitroZeticLlm { class HybridZeticLLMSpec_cxx; }
 #include "HybridZeticLLMModelSpec.hpp"
 #include "HybridZeticLLMSpec.hpp"
 #include "NativeExplicitRuntimeConfig.hpp"
+#include "NativeImagePreprocessConfig.hpp"
 #include "NativeLLMInitOption.hpp"
+#include "NativeLoadModelConfig.hpp"
+#include "NativeMediaInput.hpp"
+#include "NativeMultimodalEncoderConfig.hpp"
+#include "NativePromptEmbeddingBlock.hpp"
 #include "TokenEvent.hpp"
+#include <NitroModules/ArrayBuffer.hpp>
+#include <NitroModules/ArrayBufferHolder.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
 #include <NitroModules/Result.hpp>
@@ -42,6 +61,7 @@ namespace NitroZeticLlm { class HybridZeticLLMSpec_cxx; }
 #include <memory>
 #include <optional>
 #include <string>
+#include <vector>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -142,111 +162,15 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     return optional.value();
   }
   
-  // pragma MARK: std::shared_ptr<Promise<void>>
+  // pragma MARK: std::vector<std::string>
   /**
-   * Specialized version of `std::shared_ptr<Promise<void>>`.
+   * Specialized version of `std::vector<std::string>`.
    */
-  using std__shared_ptr_Promise_void__ = std::shared_ptr<Promise<void>>;
-  inline std::shared_ptr<Promise<void>> create_std__shared_ptr_Promise_void__() noexcept {
-    return Promise<void>::create();
-  }
-  inline PromiseHolder<void> wrap_std__shared_ptr_Promise_void__(std::shared_ptr<Promise<void>> promise) noexcept {
-    return PromiseHolder<void>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void()>
-  /**
-   * Specialized version of `std::function<void()>`.
-   */
-  using Func_void = std::function<void()>;
-  /**
-   * Wrapper class for a `std::function<void()>`, this can be used from Swift.
-   */
-  class Func_void_Wrapper final {
-  public:
-    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_unique<std::function<void()>>(std::move(func))) {}
-    inline void call() const noexcept {
-      _function->operator()();
-    }
-  private:
-    std::unique_ptr<std::function<void()>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
-    return Func_void_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::shared_ptr<HybridZeticLLMModelSpec>
-  /**
-   * Specialized version of `std::shared_ptr<HybridZeticLLMModelSpec>`.
-   */
-  using std__shared_ptr_HybridZeticLLMModelSpec_ = std::shared_ptr<HybridZeticLLMModelSpec>;
-  std::shared_ptr<HybridZeticLLMModelSpec> create_std__shared_ptr_HybridZeticLLMModelSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridZeticLLMModelSpec_(std__shared_ptr_HybridZeticLLMModelSpec_ cppType);
-  
-  // pragma MARK: std::weak_ptr<HybridZeticLLMModelSpec>
-  using std__weak_ptr_HybridZeticLLMModelSpec_ = std::weak_ptr<HybridZeticLLMModelSpec>;
-  inline std__weak_ptr_HybridZeticLLMModelSpec_ weakify_std__shared_ptr_HybridZeticLLMModelSpec_(const std::shared_ptr<HybridZeticLLMModelSpec>& strong) noexcept { return strong; }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<GenerateResult>>>
-  using Result_std__shared_ptr_Promise_GenerateResult___ = Result<std::shared_ptr<Promise<GenerateResult>>>;
-  inline Result_std__shared_ptr_Promise_GenerateResult___ create_Result_std__shared_ptr_Promise_GenerateResult___(const std::shared_ptr<Promise<GenerateResult>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<GenerateResult>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_GenerateResult___ create_Result_std__shared_ptr_Promise_GenerateResult___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<GenerateResult>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
-  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
-  }
-  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<void>>>::withError(error);
-  }
-  
-  // pragma MARK: Result<void>
-  using Result_void_ = Result<void>;
-  inline Result_void_ create_Result_void_() noexcept {
-    return Result<void>::withValue();
-  }
-  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
-    return Result<void>::withError(error);
-  }
-  
-  // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>
-  /**
-   * Specialized version of `std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>`.
-   */
-  using std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec___ = std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>;
-  inline std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> create_std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec___() noexcept {
-    return Promise<std::shared_ptr<HybridZeticLLMModelSpec>>::create();
-  }
-  inline PromiseHolder<std::shared_ptr<HybridZeticLLMModelSpec>> wrap_std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec___(std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> promise) noexcept {
-    return PromiseHolder<std::shared_ptr<HybridZeticLLMModelSpec>>(std::move(promise));
-  }
-  
-  // pragma MARK: std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>
-  /**
-   * Specialized version of `std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>&)>`.
-   */
-  using Func_void_std__shared_ptr_HybridZeticLLMModelSpec_ = std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>;
-  /**
-   * Wrapper class for a `std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& / * result * /)>`, this can be used from Swift.
-   */
-  class Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper final {
-  public:
-    explicit Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper(std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>>(std::move(func))) {}
-    inline void call(std::shared_ptr<HybridZeticLLMModelSpec> result) const noexcept {
-      _function->operator()(result);
-    }
-  private:
-    std::unique_ptr<std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>> _function;
-  } SWIFT_NONCOPYABLE;
-  Func_void_std__shared_ptr_HybridZeticLLMModelSpec_ create_Func_void_std__shared_ptr_HybridZeticLLMModelSpec_(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper wrap_Func_void_std__shared_ptr_HybridZeticLLMModelSpec_(Func_void_std__shared_ptr_HybridZeticLLMModelSpec_ value) noexcept {
-    return Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper(std::move(value));
+  using std__vector_std__string_ = std::vector<std::string>;
+  inline std::vector<std::string> create_std__vector_std__string_(size_t size) noexcept {
+    std::vector<std::string> vector;
+    vector.reserve(size);
+    return vector;
   }
   
   // pragma MARK: std::optional<double>
@@ -309,26 +233,352 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     return optional.value();
   }
   
-  // pragma MARK: std::function<void(double /* progress */)>
+  // pragma MARK: std::vector<double>
+  /**
+   * Specialized version of `std::vector<double>`.
+   */
+  using std__vector_double_ = std::vector<double>;
+  inline std::vector<double> create_std__vector_double_(size_t size) noexcept {
+    std::vector<double> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::optional<NativeMultimodalEncoderConfig>
+  /**
+   * Specialized version of `std::optional<NativeMultimodalEncoderConfig>`.
+   */
+  using std__optional_NativeMultimodalEncoderConfig_ = std::optional<NativeMultimodalEncoderConfig>;
+  inline std::optional<NativeMultimodalEncoderConfig> create_std__optional_NativeMultimodalEncoderConfig_(const NativeMultimodalEncoderConfig& value) noexcept {
+    return std::optional<NativeMultimodalEncoderConfig>(value);
+  }
+  inline bool has_value_std__optional_NativeMultimodalEncoderConfig_(const std::optional<NativeMultimodalEncoderConfig>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeMultimodalEncoderConfig get_std__optional_NativeMultimodalEncoderConfig_(const std::optional<NativeMultimodalEncoderConfig>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<std::vector<double>>
+  /**
+   * Specialized version of `std::optional<std::vector<double>>`.
+   */
+  using std__optional_std__vector_double__ = std::optional<std::vector<double>>;
+  inline std::optional<std::vector<double>> create_std__optional_std__vector_double__(const std::vector<double>& value) noexcept {
+    return std::optional<std::vector<double>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_double__(const std::optional<std::vector<double>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<double> get_std__optional_std__vector_double__(const std::optional<std::vector<double>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeImagePreprocessConfig>
+  /**
+   * Specialized version of `std::optional<NativeImagePreprocessConfig>`.
+   */
+  using std__optional_NativeImagePreprocessConfig_ = std::optional<NativeImagePreprocessConfig>;
+  inline std::optional<NativeImagePreprocessConfig> create_std__optional_NativeImagePreprocessConfig_(const NativeImagePreprocessConfig& value) noexcept {
+    return std::optional<NativeImagePreprocessConfig>(value);
+  }
+  inline bool has_value_std__optional_NativeImagePreprocessConfig_(const std::optional<NativeImagePreprocessConfig>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeImagePreprocessConfig get_std__optional_NativeImagePreprocessConfig_(const std::optional<NativeImagePreprocessConfig>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<bool>
+  /**
+   * Specialized version of `std::optional<bool>`.
+   */
+  using std__optional_bool_ = std::optional<bool>;
+  inline std::optional<bool> create_std__optional_bool_(const bool& value) noexcept {
+    return std::optional<bool>(value);
+  }
+  inline bool has_value_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<std::shared_ptr<ArrayBuffer>>
+  /**
+   * Specialized version of `std::optional<std::shared_ptr<ArrayBuffer>>`.
+   */
+  using std__optional_std__shared_ptr_ArrayBuffer__ = std::optional<std::shared_ptr<ArrayBuffer>>;
+  inline std::optional<std::shared_ptr<ArrayBuffer>> create_std__optional_std__shared_ptr_ArrayBuffer__(const std::shared_ptr<ArrayBuffer>& value) noexcept {
+    return std::optional<std::shared_ptr<ArrayBuffer>>(value);
+  }
+  inline bool has_value_std__optional_std__shared_ptr_ArrayBuffer__(const std::optional<std::shared_ptr<ArrayBuffer>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::shared_ptr<ArrayBuffer> get_std__optional_std__shared_ptr_ArrayBuffer__(const std::optional<std::shared_ptr<ArrayBuffer>>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::optional<NativeMediaInput>
+  /**
+   * Specialized version of `std::optional<NativeMediaInput>`.
+   */
+  using std__optional_NativeMediaInput_ = std::optional<NativeMediaInput>;
+  inline std::optional<NativeMediaInput> create_std__optional_NativeMediaInput_(const NativeMediaInput& value) noexcept {
+    return std::optional<NativeMediaInput>(value);
+  }
+  inline bool has_value_std__optional_NativeMediaInput_(const std::optional<NativeMediaInput>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NativeMediaInput get_std__optional_NativeMediaInput_(const std::optional<NativeMediaInput>& optional) noexcept {
+    return optional.value();
+  }
+  
+  // pragma MARK: std::vector<NativePromptEmbeddingBlock>
+  /**
+   * Specialized version of `std::vector<NativePromptEmbeddingBlock>`.
+   */
+  using std__vector_NativePromptEmbeddingBlock_ = std::vector<NativePromptEmbeddingBlock>;
+  inline std::vector<NativePromptEmbeddingBlock> create_std__vector_NativePromptEmbeddingBlock_(size_t size) noexcept {
+    std::vector<NativePromptEmbeddingBlock> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::vector<double>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<double>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_double___ = std::shared_ptr<Promise<std::vector<double>>>;
+  inline std::shared_ptr<Promise<std::vector<double>>> create_std__shared_ptr_Promise_std__vector_double___() noexcept {
+    return Promise<std::vector<double>>::create();
+  }
+  inline PromiseHolder<std::vector<double>> wrap_std__shared_ptr_Promise_std__vector_double___(std::shared_ptr<Promise<std::vector<double>>> promise) noexcept {
+    return PromiseHolder<std::vector<double>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<double>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<double>&)>`.
+   */
+  using Func_void_std__vector_double_ = std::function<void(const std::vector<double>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<double>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_double__Wrapper final {
+  public:
+    explicit Func_void_std__vector_double__Wrapper(std::function<void(const std::vector<double>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<double>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<double> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<double>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_double_ create_Func_void_std__vector_double_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_double__Wrapper wrap_Func_void_std__vector_double_(Func_void_std__vector_double_ value) noexcept {
+    return Func_void_std__vector_double__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>`.
+   */
+  using std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___ = std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>;
+  inline std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> create_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___() noexcept {
+    return Promise<std::shared_ptr<ArrayBuffer>>::create();
+  }
+  inline PromiseHolder<std::shared_ptr<ArrayBuffer>> wrap_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___(std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> promise) noexcept {
+    return PromiseHolder<std::shared_ptr<ArrayBuffer>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<ArrayBuffer>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::shared_ptr<ArrayBuffer>&)>`.
+   */
+  using Func_void_std__shared_ptr_ArrayBuffer_ = std::function<void(const std::shared_ptr<ArrayBuffer>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::shared_ptr<ArrayBuffer>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__shared_ptr_ArrayBuffer__Wrapper final {
+  public:
+    explicit Func_void_std__shared_ptr_ArrayBuffer__Wrapper(std::function<void(const std::shared_ptr<ArrayBuffer>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::shared_ptr<ArrayBuffer>& /* result */)>>(std::move(func))) {}
+    inline void call(ArrayBufferHolder result) const noexcept {
+      _function->operator()(result.getArrayBuffer());
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::shared_ptr<ArrayBuffer>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__shared_ptr_ArrayBuffer_ create_Func_void_std__shared_ptr_ArrayBuffer_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__shared_ptr_ArrayBuffer__Wrapper wrap_Func_void_std__shared_ptr_ArrayBuffer_(Func_void_std__shared_ptr_ArrayBuffer_ value) noexcept {
+    return Func_void_std__shared_ptr_ArrayBuffer__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<double>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<double>>`.
+   */
+  using std__shared_ptr_Promise_double__ = std::shared_ptr<Promise<double>>;
+  inline std::shared_ptr<Promise<double>> create_std__shared_ptr_Promise_double__() noexcept {
+    return Promise<double>::create();
+  }
+  inline PromiseHolder<double> wrap_std__shared_ptr_Promise_double__(std::shared_ptr<Promise<double>> promise) noexcept {
+    return PromiseHolder<double>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(double /* result */)>
   /**
    * Specialized version of `std::function<void(double)>`.
    */
-  using Func_void_double = std::function<void(double /* progress */)>;
+  using Func_void_double = std::function<void(double /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(double / * progress * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(double / * result * /)>`, this can be used from Swift.
    */
   class Func_void_double_Wrapper final {
   public:
-    explicit Func_void_double_Wrapper(std::function<void(double /* progress */)>&& func): _function(std::make_unique<std::function<void(double /* progress */)>>(std::move(func))) {}
-    inline void call(double progress) const noexcept {
-      _function->operator()(progress);
+    explicit Func_void_double_Wrapper(std::function<void(double /* result */)>&& func): _function(std::make_unique<std::function<void(double /* result */)>>(std::move(func))) {}
+    inline void call(double result) const noexcept {
+      _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(double /* progress */)>> _function;
+    std::unique_ptr<std::function<void(double /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
   Func_void_double create_Func_void_double(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_double_Wrapper wrap_Func_void_double(Func_void_double value) noexcept {
     return Func_void_double_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<void>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<void>>`.
+   */
+  using std__shared_ptr_Promise_void__ = std::shared_ptr<Promise<void>>;
+  inline std::shared_ptr<Promise<void>> create_std__shared_ptr_Promise_void__() noexcept {
+    return Promise<void>::create();
+  }
+  inline PromiseHolder<void> wrap_std__shared_ptr_Promise_void__(std::shared_ptr<Promise<void>> promise) noexcept {
+    return PromiseHolder<void>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void()>
+  /**
+   * Specialized version of `std::function<void()>`.
+   */
+  using Func_void = std::function<void()>;
+  /**
+   * Wrapper class for a `std::function<void()>`, this can be used from Swift.
+   */
+  class Func_void_Wrapper final {
+  public:
+    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_unique<std::function<void()>>(std::move(func))) {}
+    inline void call() const noexcept {
+      _function->operator()();
+    }
+  private:
+    std::unique_ptr<std::function<void()>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
+    return Func_void_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::shared_ptr<HybridZeticLLMModelSpec>
+  /**
+   * Specialized version of `std::shared_ptr<HybridZeticLLMModelSpec>`.
+   */
+  using std__shared_ptr_HybridZeticLLMModelSpec_ = std::shared_ptr<HybridZeticLLMModelSpec>;
+  std::shared_ptr<HybridZeticLLMModelSpec> create_std__shared_ptr_HybridZeticLLMModelSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridZeticLLMModelSpec_(std__shared_ptr_HybridZeticLLMModelSpec_ cppType);
+  
+  // pragma MARK: std::weak_ptr<HybridZeticLLMModelSpec>
+  using std__weak_ptr_HybridZeticLLMModelSpec_ = std::weak_ptr<HybridZeticLLMModelSpec>;
+  inline std__weak_ptr_HybridZeticLLMModelSpec_ weakify_std__shared_ptr_HybridZeticLLMModelSpec_(const std::shared_ptr<HybridZeticLLMModelSpec>& strong) noexcept { return strong; }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<GenerateResult>>>
+  using Result_std__shared_ptr_Promise_GenerateResult___ = Result<std::shared_ptr<Promise<GenerateResult>>>;
+  inline Result_std__shared_ptr_Promise_GenerateResult___ create_Result_std__shared_ptr_Promise_GenerateResult___(const std::shared_ptr<Promise<GenerateResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<GenerateResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_GenerateResult___ create_Result_std__shared_ptr_Promise_GenerateResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<GenerateResult>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<double>>>>
+  using Result_std__shared_ptr_Promise_std__vector_double____ = Result<std::shared_ptr<Promise<std::vector<double>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_double____ create_Result_std__shared_ptr_Promise_std__vector_double____(const std::shared_ptr<Promise<std::vector<double>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<double>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_double____ create_Result_std__shared_ptr_Promise_std__vector_double____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<double>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>>
+  using Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____ = Result<std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>>;
+  inline Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____ create_Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____(const std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____ create_Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<double>>>
+  using Result_std__shared_ptr_Promise_double___ = Result<std::shared_ptr<Promise<double>>>;
+  inline Result_std__shared_ptr_Promise_double___ create_Result_std__shared_ptr_Promise_double___(const std::shared_ptr<Promise<double>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<double>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_double___ create_Result_std__shared_ptr_Promise_double___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<double>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
+  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withError(error);
+  }
+  
+  // pragma MARK: Result<void>
+  using Result_void_ = Result<void>;
+  inline Result_void_ create_Result_void_() noexcept {
+    return Result<void>::withValue();
+  }
+  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
+    return Result<void>::withError(error);
+  }
+  
+  // pragma MARK: std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>`.
+   */
+  using std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec___ = std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>>;
+  inline std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> create_std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec___() noexcept {
+    return Promise<std::shared_ptr<HybridZeticLLMModelSpec>>::create();
+  }
+  inline PromiseHolder<std::shared_ptr<HybridZeticLLMModelSpec>> wrap_std__shared_ptr_Promise_std__shared_ptr_HybridZeticLLMModelSpec___(std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> promise) noexcept {
+    return PromiseHolder<std::shared_ptr<HybridZeticLLMModelSpec>>(std::move(promise));
+  }
+  
+  // pragma MARK: std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>&)>`.
+   */
+  using Func_void_std__shared_ptr_HybridZeticLLMModelSpec_ = std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper final {
+  public:
+    explicit Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper(std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>>(std::move(func))) {}
+    inline void call(std::shared_ptr<HybridZeticLLMModelSpec> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::shared_ptr<HybridZeticLLMModelSpec>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__shared_ptr_HybridZeticLLMModelSpec_ create_Func_void_std__shared_ptr_HybridZeticLLMModelSpec_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper wrap_Func_void_std__shared_ptr_HybridZeticLLMModelSpec_(Func_void_std__shared_ptr_HybridZeticLLMModelSpec_ value) noexcept {
+    return Func_void_std__shared_ptr_HybridZeticLLMModelSpec__Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<std::function<void(double /* progress */)>>

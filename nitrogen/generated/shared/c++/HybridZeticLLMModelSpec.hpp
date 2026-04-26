@@ -17,6 +17,10 @@
 namespace margelo::nitro::zeticllm { struct GenerateResult; }
 // Forward declaration of `TokenEvent` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct TokenEvent; }
+// Forward declaration of `NativeMultimodalGenerateConfig` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalGenerateConfig; }
+// Forward declaration of `NativeMultimodalProfile` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeMultimodalProfile; }
 
 #include "GenerateResult.hpp"
 #include <NitroModules/Promise.hpp>
@@ -24,6 +28,10 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include "TokenEvent.hpp"
 #include <functional>
 #include <optional>
+#include "NativeMultimodalGenerateConfig.hpp"
+#include <NitroModules/ArrayBuffer.hpp>
+#include <vector>
+#include "NativeMultimodalProfile.hpp"
 
 namespace margelo::nitro::zeticllm {
 
@@ -57,6 +65,12 @@ namespace margelo::nitro::zeticllm {
     public:
       // Methods
       virtual std::shared_ptr<Promise<GenerateResult>> generate(const std::string& prompt, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) = 0;
+      virtual std::shared_ptr<Promise<GenerateResult>> generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) = 0;
+      virtual std::shared_ptr<Promise<GenerateResult>> runWithEmbeddings(const std::shared_ptr<ArrayBuffer>& embeddings, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) = 0;
+      virtual std::shared_ptr<Promise<std::vector<double>>> tokenize(const std::string& text, std::optional<bool> parseSpecial) = 0;
+      virtual std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> tokenEmbeddings(const std::vector<double>& tokenIds) = 0;
+      virtual std::shared_ptr<Promise<double>> specialTokenId(const std::string& name) = 0;
+      virtual std::shared_ptr<Promise<void>> validateMultimodalProfile(const NativeMultimodalProfile& profile) = 0;
       virtual std::shared_ptr<Promise<void>> cleanUp() = 0;
       virtual void release() = 0;
 
