@@ -22,7 +22,13 @@ public final class Func_void_std__vector_double_ {
 
   @inline(__always)
   public func call(value: bridge.std__vector_double_) -> Void {
-    self.closure(value.map({ __item in __item }))
+    var __array: [Double] = []
+    let __count = Int(value.size())
+    __array.reserveCapacity(__count)
+    for __index in 0..<__count {
+      __array.append(value[__index])
+    }
+    self.closure(__array)
   }
 
   /**

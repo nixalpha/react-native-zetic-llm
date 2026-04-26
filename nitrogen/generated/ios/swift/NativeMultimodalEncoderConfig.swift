@@ -47,7 +47,13 @@ public extension NativeMultimodalEncoderConfig {
   
   @inline(__always)
   var inputShape: [Double] {
-    return self.__inputShape.map({ __item in __item })
+    var __array: [Double] = []
+    let __count = Int(self.__inputShape.size())
+    __array.reserveCapacity(__count)
+    for __index in 0..<__count {
+      __array.append(self.__inputShape[__index])
+    }
+    return __array
   }
   
   @inline(__always)

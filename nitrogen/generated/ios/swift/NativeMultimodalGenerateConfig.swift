@@ -92,7 +92,13 @@ public extension NativeMultimodalGenerateConfig {
   
   @inline(__always)
   var blocks: [NativePromptEmbeddingBlock] {
-    return self.__blocks.map({ __item in __item })
+    var __array: [NativePromptEmbeddingBlock] = []
+    let __count = Int(self.__blocks.size())
+    __array.reserveCapacity(__count)
+    for __index in 0..<__count {
+      __array.append(self.__blocks[__index])
+    }
+    return __array
   }
   
   @inline(__always)

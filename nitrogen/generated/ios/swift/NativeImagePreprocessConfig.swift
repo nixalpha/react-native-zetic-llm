@@ -115,7 +115,13 @@ public extension NativeImagePreprocessConfig {
     return { () -> [Double]? in
       if bridge.has_value_std__optional_std__vector_double__(self.__mean) {
         let __unwrapped = bridge.get_std__optional_std__vector_double__(self.__mean)
-        return __unwrapped.map({ __item in __item })
+        var __array: [Double] = []
+        let __count = Int(__unwrapped.size())
+        __array.reserveCapacity(__count)
+        for __index in 0..<__count {
+          __array.append(__unwrapped[__index])
+        }
+        return __array
       } else {
         return nil
       }
@@ -127,7 +133,13 @@ public extension NativeImagePreprocessConfig {
     return { () -> [Double]? in
       if bridge.has_value_std__optional_std__vector_double__(self.__std) {
         let __unwrapped = bridge.get_std__optional_std__vector_double__(self.__std)
-        return __unwrapped.map({ __item in __item })
+        var __array: [Double] = []
+        let __count = Int(__unwrapped.size())
+        __array.reserveCapacity(__count)
+        for __index in 0..<__count {
+          __array.append(__unwrapped[__index])
+        }
+        return __array
       } else {
         return nil
       }

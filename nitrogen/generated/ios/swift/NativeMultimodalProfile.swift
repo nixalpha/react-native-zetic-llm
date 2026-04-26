@@ -35,6 +35,12 @@ public extension NativeMultimodalProfile {
   
   @inline(__always)
   var requiredSpecialTokens: [String] {
-    return self.__requiredSpecialTokens.map({ __item in String(__item) })
+    var __array: [String] = []
+    let __count = Int(self.__requiredSpecialTokens.size())
+    __array.reserveCapacity(__count)
+    for __index in 0..<__count {
+      __array.append(String(self.__requiredSpecialTokens[__index]))
+    }
+    return __array
   }
 }

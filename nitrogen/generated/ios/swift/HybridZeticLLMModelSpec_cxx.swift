@@ -252,7 +252,16 @@ open class HybridZeticLLMModelSpec_cxx {
   @inline(__always)
   public final func tokenEmbeddings(tokenIds: bridge.std__vector_double_) -> bridge.Result_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer____ {
     do {
-      let __result = try self.__implementation.tokenEmbeddings(tokenIds: tokenIds.map({ __item in __item }))
+      let __tokenIds = { () -> [Double] in
+        var __array: [Double] = []
+        let __count = Int(tokenIds.size())
+        __array.reserveCapacity(__count)
+        for __index in 0..<__count {
+          __array.append(tokenIds[__index])
+        }
+        return __array
+      }()
+      let __result = try self.__implementation.tokenEmbeddings(tokenIds: __tokenIds)
       let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___ in
         let __promise = bridge.create_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___()
         let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__shared_ptr_ArrayBuffer___(__promise)
