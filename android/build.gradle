@@ -142,4 +142,5 @@ dependencies {
   // Add a dependency on NitroModules
   implementation project(":react-native-nitro-modules")
   implementation "com.zeticai.mlange:mlange:${getExtOrDefault("zeticMlangeVersion")}"
+  implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${getExtOrDefault("coroutinesVersion")}"
 }

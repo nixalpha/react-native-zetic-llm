@@ -1,6 +1,5 @@
 package com.margelo.nitro.zeticllm
 
-import android.os.SystemClock
 import android.util.Log
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.core.Promise
@@ -9,6 +8,8 @@ import com.zeticai.mlange.core.cache.ModelCacheHandlingPolicy
 import com.zeticai.mlange.core.model.APType
 import com.zeticai.mlange.core.model.ModelLoadingStatus
 import com.zeticai.mlange.core.model.llm.*
+
+private const val BYTES_PER_GIGABYTE = 1_000_000_000.0
 
 @DoNotStrip
 class HybridZeticLLM : HybridZeticLLMSpec() {
@@ -21,7 +22,7 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       val version = config.version?.toInt()
       val initOption = makeInitOption(config.initOption)
       val cachePolicy = makeCachePolicy(config.cacheHandlingPolicy)
-      val progress = makeProgressCallback(onDownload)
+      val downloadedGigabytes = makeDownloadedGigabytesCallback(onDownload)
       val statusChanged = makeStatusChangedCallback()
 
       Log.d(
@@ -29,32 +30,37 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
         "loadModel: name=${config.name}, version=${version ?: "latest"}, mode=${config.modelMode ?: "RUN_AUTO"}, explicitRuntime=${config.explicitRuntime != null}"
       )
 
-      val model = config.explicitRuntime?.let { explicit ->
-        ZeticMLangeLLMModel(
+      val model = MLangeDownloadSize.withDownloadedBytes(
+        context = context,
+        onBytes = downloadedGigabytes
+      ) {
+        config.explicitRuntime?.let { explicit ->
+          ZeticMLangeLLMModel(
+            context = context,
+            personalKey = config.personalKey,
+            name = config.name,
+            version = version,
+            target = makeTarget(explicit.target),
+            quantType = makeQuantType(explicit.quantType),
+            apType = makeAPType(explicit.apType),
+            onProgress = null,
+            onStatusChanged = statusChanged,
+            cacheHandlingPolicy = cachePolicy,
+            initOption = initOption
+          )
+        } ?: ZeticMLangeLLMModel(
           context = context,
           personalKey = config.personalKey,
           name = config.name,
           version = version,
-          target = makeTarget(explicit.target),
-          quantType = makeQuantType(explicit.quantType),
-          apType = makeAPType(explicit.apType),
-          onProgress = progress,
+          modelMode = makeModelMode(config.modelMode),
+          dataSetType = makeDataSetType(config.dataSetType),
+          onProgress = null,
           onStatusChanged = statusChanged,
           cacheHandlingPolicy = cachePolicy,
           initOption = initOption
         )
-      } ?: ZeticMLangeLLMModel(
-        context = context,
-        personalKey = config.personalKey,
-        name = config.name,
-        version = version,
-        modelMode = makeModelMode(config.modelMode),
-        dataSetType = makeDataSetType(config.dataSetType),
-        onProgress = progress,
-        onStatusChanged = statusChanged,
-        cacheHandlingPolicy = cachePolicy,
-        initOption = initOption
-      )
+      }
 
       Log.d(TAG, "loadModel: model initialized for ${config.name}")
       HybridZeticLLMModel(model)
@@ -66,65 +72,15 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
   private fun makeStatusChangedCallback(): (ModelLoadingStatus) -> Unit =
     { status -> Log.d(TAG, "model loading status: $status") }
 
-  private fun makeProgressCallback(onDownload: ((Double) -> Unit)?): ((Float) -> Unit)? {
-    val lock = Any()
-    var lastProgress = Double.NaN
-    var lastEmittedAt = 0L
-    var lastRawLogProgress = Double.NaN
-    var lastRawLoggedAt = 0L
-
-    return { value: Float ->
-      val progress = value.toDouble().coerceIn(0.0, 1.0)
-      val now = SystemClock.uptimeMillis()
-      val decision = synchronized(lock) {
-        val isFirst = lastProgress.isNaN()
-        val isBoundary = progress == 0.0 || progress == 1.0
-        val changedEnough = isFirst || kotlin.math.abs(progress - lastProgress) >= 0.01
-        val waitedEnough = now - lastEmittedAt >= 250
-        val shouldLogRaw =
-          lastRawLogProgress.isNaN() ||
-            isBoundary && progress != lastRawLogProgress ||
-            kotlin.math.abs(progress - lastRawLogProgress) >= 0.001 ||
-            now - lastRawLoggedAt >= 1_000
-
-        if (shouldLogRaw) {
-          lastRawLogProgress = progress
-          lastRawLoggedAt = now
-        }
-
-        val shouldEmit = when {
-          isFirst -> true
-          isBoundary && progress != lastProgress -> true
-          changedEnough && waitedEnough -> true
-          else -> false
-        }
-
-        if (shouldEmit) {
-          lastProgress = progress
-          lastEmittedAt = now
-        }
-
-        ProgressDecision(shouldLogRaw, shouldEmit)
-      }
-
-      if (decision.shouldLogRaw) {
-        Log.d(TAG, "download progress raw=${formatProgress(progress)}")
-      }
-
-      if (decision.shouldEmit) {
-        Log.d(TAG, "download progress forwarded=${formatProgress(progress)}")
-        onDownload?.invoke(progress)
-      }
+  private fun makeDownloadedGigabytesCallback(onDownload: ((Double) -> Unit)?): (Long) -> Unit =
+    { bytes ->
+      val gigabytes = bytes.toDouble() / BYTES_PER_GIGABYTE
+      Log.d(TAG, "downloaded model size=${formatGigabytes(gigabytes)} GB")
+      onDownload?.invoke(gigabytes)
     }
-  }
 
-  private data class ProgressDecision(
-    val shouldLogRaw: Boolean,
-    val shouldEmit: Boolean
-  )
-
-  private fun formatProgress(progress: Double): String =
-    "${"%.4f".format(progress)} (${(progress * 100.0).toInt()}%)"
+  private fun formatGigabytes(gigabytes: Double): String =
+    "%.3f".format(gigabytes)
 
   private fun makeModelMode(value: String?): LLMModelMode =
     when (normalize(value)) {
