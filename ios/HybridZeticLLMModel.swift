@@ -554,9 +554,9 @@ private extension NativeMediaInput {
       rgba[target + 3] = stride == 4 ? inputBytes[source + 3] : 255
     }
 
-    let data = Data(rgba) as CFData
+    let pixelData = Data(rgba) as CFData
     guard
-      let provider = CGDataProvider(data: data),
+      let provider = CGDataProvider(data: pixelData),
       let cgImage = CGImage(
         width: Int(width),
         height: Int(height),
