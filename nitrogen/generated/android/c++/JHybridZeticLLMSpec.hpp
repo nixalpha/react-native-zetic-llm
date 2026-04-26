@@ -55,6 +55,7 @@ namespace margelo::nitro::zeticllm {
   public:
     // Methods
     std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> loadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(double /* progress */)>>& onDownload) override;
+    std::shared_ptr<Promise<void>> preloadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& onProgress) override;
 
   private:
     jni::global_ref<JHybridZeticLLMSpec::JavaPart> _javaPart;

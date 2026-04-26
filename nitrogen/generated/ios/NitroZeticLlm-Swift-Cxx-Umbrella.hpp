@@ -24,6 +24,8 @@ namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
 namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
 // Forward declaration of `NativeMediaInput` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
+// Forward declaration of `NativeModelProgressEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeModelProgressEvent; }
 // Forward declaration of `NativeMultimodalEncoderConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeMultimodalEncoderConfig; }
 // Forward declaration of `NativeMultimodalGenerateConfig` to properly resolve imports.
@@ -44,6 +46,7 @@ namespace margelo::nitro::zeticllm { struct TokenEvent; }
 #include "NativeLLMInitOption.hpp"
 #include "NativeLoadModelConfig.hpp"
 #include "NativeMediaInput.hpp"
+#include "NativeModelProgressEvent.hpp"
 #include "NativeMultimodalEncoderConfig.hpp"
 #include "NativeMultimodalGenerateConfig.hpp"
 #include "NativeMultimodalProfile.hpp"

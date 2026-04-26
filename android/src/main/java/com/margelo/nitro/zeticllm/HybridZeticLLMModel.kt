@@ -8,10 +8,12 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
 import android.net.Uri
+import android.util.Log
 import com.facebook.proguard.annotations.DoNotStrip
 import com.margelo.nitro.core.ArrayBuffer
 import com.margelo.nitro.core.Promise
 import com.zeticai.mlange.core.cache.ModelCacheHandlingPolicy
+import com.zeticai.mlange.core.model.ModelLoadingStatus
 import com.zeticai.mlange.core.model.ModelMode
 import com.zeticai.mlange.core.model.ZeticMLangeModel
 import com.zeticai.mlange.core.model.llm.ZeticMLangeLLMModel
@@ -22,6 +24,7 @@ import com.zeticai.mlange.core.tensor.Tensor
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import kotlinx.coroutines.runBlocking
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
@@ -30,6 +33,9 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sin
+
+private const val ENCODER_TAG = "NitroZeticLlm/Encoder"
+private const val BYTES_PER_GIGABYTE = 1_000_000_000.0
 
 @DoNotStrip
 class HybridZeticLLMModel(
@@ -84,7 +90,8 @@ class HybridZeticLLMModel(
 
   override fun generateMultimodal(
     config: NativeMultimodalGenerateConfig,
-    onToken: ((TokenEvent) -> Unit)?
+    onToken: ((TokenEvent) -> Unit)?,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
   ): Promise<GenerateResult> {
     return Promise.async {
       val activeModel = beginGeneration()
@@ -103,8 +110,8 @@ class HybridZeticLLMModel(
             val input = block.input
               ?: throw IllegalArgumentException("INVALID_MULTIMODAL_CONFIG: $type block '$id' is missing input.")
             mediaEmbeddings[id] = when (type) {
-              "audio" -> encodeAudioBlock(input, config.audioEncoder, config.audioPreprocess)
-              "image" -> encodeImageBlock(input, config.imageEncoder, config.imagePreprocess)
+              "audio" -> encodeAudioBlock(input, config.audioEncoder, config.audioPreprocess, onProgress)
+              "image" -> encodeImageBlock(input, config.imageEncoder, config.imagePreprocess, onProgress)
               else -> error("unreachable")
             }
           }
@@ -265,7 +272,8 @@ class HybridZeticLLMModel(
   private fun encodeAudioBlock(
     input: NativeMediaInput,
     encoderConfig: NativeMultimodalEncoderConfig?,
-    audioPreprocess: String?
+    audioPreprocess: String?,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
   ): FloatArray {
     val config = encoderConfig
       ?: throw IllegalArgumentException("INVALID_MULTIMODAL_CONFIG: audioEncoder is required for audio blocks.")
@@ -278,28 +286,31 @@ class HybridZeticLLMModel(
 
     val pcm = input.toPcmFloatArray().resampleMonoTo16k()
     val chunks = QwenOmniAudioPreprocessor.melChunks(pcm.samples)
-    return runEncoderChunks(config, chunks)
+    return runEncoderChunks(config, chunks, "audioEncoder", onProgress)
   }
 
   private fun encodeImageBlock(
     input: NativeMediaInput,
     encoderConfig: NativeMultimodalEncoderConfig?,
-    imagePreprocess: NativeImagePreprocessConfig?
+    imagePreprocess: NativeImagePreprocessConfig?,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
   ): FloatArray {
     val config = encoderConfig
       ?: throw IllegalArgumentException("INVALID_MULTIMODAL_CONFIG: imageEncoder is required for image blocks.")
     val preprocess = imagePreprocess
       ?: throw IllegalArgumentException("INVALID_MULTIMODAL_CONFIG: imagePreprocess is required for image blocks.")
     val tensor = input.toImageTensor(preprocess, config)
-    return runEncoderOnce(config, tensor)
+    return runEncoderOnce(config, tensor, "imageEncoder", onProgress)
   }
 
   private fun runEncoderChunks(
     config: NativeMultimodalEncoderConfig,
-    chunks: List<TensorPayload>
+    chunks: List<TensorPayload>,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
   ): FloatArray {
     val outputs = mutableListOf<FloatArray>()
-    val encoder = createEncoder(config.model)
+    val encoder = createEncoder(config.model, modelRole, onProgress)
     try {
       chunks.forEach { payload ->
         outputs += encoder.run(arrayOf(payload.toTensor()))[config.outputIndexValue()].data<FloatArray>()
@@ -312,9 +323,11 @@ class HybridZeticLLMModel(
 
   private fun runEncoderOnce(
     config: NativeMultimodalEncoderConfig,
-    payload: TensorPayload
+    payload: TensorPayload,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
   ): FloatArray {
-    val encoder = createEncoder(config.model)
+    val encoder = createEncoder(config.model, modelRole, onProgress)
     try {
       return encoder.run(arrayOf(payload.toTensor()))[config.outputIndexValue()].data<FloatArray>()
     } finally {
@@ -322,26 +335,115 @@ class HybridZeticLLMModel(
     }
   }
 
-  private fun createEncoder(config: NativeLoadModelConfig): ZeticMLangeModel {
+  private fun createEncoder(
+    config: NativeLoadModelConfig,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
+  ): ZeticMLangeModel {
     if (config.explicitRuntime != null) {
       throw IllegalArgumentException("INVALID_MULTIMODAL_CONFIG: explicitRuntime is not supported for encoder models yet.")
     }
 
     val context = ZeticLLMContextHolder.requireContext()
-    return ZeticMLangeModel(
-      context = context,
-      personalKey = config.personalKey,
-      name = config.name,
-      version = config.version?.toInt(),
-      modelMode = when (config.modelMode?.trim()?.uppercase()) {
-        "RUN_SPEED" -> ModelMode.RUN_SPEED
-        "RUN_ACCURACY" -> ModelMode.RUN_ACCURACY
-        else -> ModelMode.RUN_AUTO
-      },
-      cacheHandlingPolicy = when (config.cacheHandlingPolicy?.trim()?.uppercase()) {
-        "KEEP_EXISTING" -> ModelCacheHandlingPolicy.KEEP_EXISTING
-        else -> ModelCacheHandlingPolicy.REMOVE_OVERLAPPING
+    val version = config.version?.toInt()
+    val statusChanged = makeEncoderStatusChangedCallback(config.name, modelRole, onProgress)
+
+    Log.d(
+      ENCODER_TAG,
+      "createEncoder: name=${config.name}, version=${version ?: "latest"}, mode=${config.modelMode ?: "RUN_AUTO"}"
+    )
+
+    emitProgress(onProgress, "starting", modelRole, config.name, progress = 0.0)
+
+    return try {
+      runBlocking {
+        MLangeDownloadSize.withDownloadedBytes(
+          context = context,
+          onBytes = makeDownloadedGigabytesCallback(config.name)
+        ) {
+          ZeticMLangeModel(
+            context = context,
+            personalKey = config.personalKey,
+            name = config.name,
+            version = version,
+            modelMode = when (config.modelMode?.trim()?.uppercase()) {
+              "RUN_SPEED" -> ModelMode.RUN_SPEED
+              "RUN_ACCURACY" -> ModelMode.RUN_ACCURACY
+              else -> ModelMode.RUN_AUTO
+            },
+            onProgress = makeEncoderDownloadProgressCallback(config.name, modelRole, onProgress),
+            onStatusChanged = statusChanged,
+            cacheHandlingPolicy = when (config.cacheHandlingPolicy?.trim()?.uppercase()) {
+              "KEEP_EXISTING" -> ModelCacheHandlingPolicy.KEEP_EXISTING
+              else -> ModelCacheHandlingPolicy.REMOVE_OVERLAPPING
+            }
+          )
+        }
+      }.also {
+        emitProgress(onProgress, "ready", modelRole, config.name, progress = 1.0)
       }
+    } catch (error: Throwable) {
+      emitProgress(
+        onProgress,
+        "error",
+        modelRole,
+        config.name,
+        progress = null,
+        error = error.message ?: error.toString()
+      )
+      throw error
+    }
+  }
+
+  private fun makeEncoderStatusChangedCallback(
+    modelName: String,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
+  ): (ModelLoadingStatus) -> Unit =
+    { status ->
+      Log.d(ENCODER_TAG, "encoder[$modelName/$modelRole] loading status: $status")
+      when (status.name.trim().uppercase()) {
+        "READY", "LOADED" ->
+          emitProgress(onProgress, "ready", modelRole, modelName, progress = 1.0)
+      }
+    }
+
+  private fun makeDownloadedGigabytesCallback(modelName: String): (Long) -> Unit =
+    { bytes ->
+      val gigabytes = bytes.toDouble() / BYTES_PER_GIGABYTE
+      Log.d(ENCODER_TAG, "encoder[$modelName] downloaded model size=${"%.3f".format(gigabytes)} GB")
+    }
+
+  private fun makeEncoderDownloadProgressCallback(
+    modelName: String,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
+  ): (Float) -> Unit = { progress ->
+    emitProgress(
+      onProgress,
+      "downloading",
+      modelRole,
+      modelName,
+      progress = progress.toDouble().coerceIn(0.0, 1.0)
+    )
+  }
+
+  private fun emitProgress(
+    callback: ((NativeModelProgressEvent) -> Unit)?,
+    phase: String,
+    modelRole: String,
+    modelName: String,
+    progress: Double? = null,
+    error: String? = null
+  ) {
+    callback?.invoke(
+      NativeModelProgressEvent(
+        phase = phase,
+        modelRole = modelRole,
+        modelName = modelName,
+        progress = progress,
+        error = error
+      )
     )
   }
 

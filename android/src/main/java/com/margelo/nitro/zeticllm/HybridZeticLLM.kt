@@ -7,6 +7,7 @@ import com.zeticai.mlange.*
 import com.zeticai.mlange.core.cache.ModelCacheHandlingPolicy
 import com.zeticai.mlange.core.model.APType
 import com.zeticai.mlange.core.model.ModelLoadingStatus
+import com.zeticai.mlange.core.model.ModelMode
 import com.zeticai.mlange.core.model.llm.*
 
 private const val BYTES_PER_GIGABYTE = 1_000_000_000.0
@@ -67,10 +68,66 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
     }
   }
 
+  override fun preloadModel(
+    config: NativeLoadModelConfig,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
+  ): Promise<Unit> {
+    return Promise.async {
+      if (config.explicitRuntime != null) {
+        throw IllegalArgumentException("INVALID_OPTION: explicitRuntime is not supported for preloadModel.")
+      }
+
+      val context = ZeticLLMContextHolder.requireContext()
+      val version = config.version?.toInt()
+      val cachePolicy = makeCachePolicy(config.cacheHandlingPolicy)
+
+      emitProgress(onProgress, "starting", "auxiliary", config.name, progress = 0.0)
+
+      try {
+        val encoder = MLangeDownloadSize.withDownloadedBytes(
+          context = context,
+          onBytes = makeDownloadedGigabytesCallback(config.name)
+        ) {
+          ZeticMLangeModel(
+            context = context,
+            personalKey = config.personalKey,
+            name = config.name,
+            version = version,
+            modelMode = makeGenericModelMode(config.modelMode),
+            onProgress = makeAuxiliaryProgressCallback(config.name, onProgress),
+            onStatusChanged = makeStatusChangedCallback(config.name, "auxiliary", onProgress),
+            cacheHandlingPolicy = cachePolicy
+          )
+        }
+        encoder.close()
+        emitProgress(onProgress, "ready", "auxiliary", config.name, progress = 1.0)
+      } catch (error: Throwable) {
+        emitProgress(
+          onProgress,
+          "error",
+          "auxiliary",
+          config.name,
+          progress = null,
+          error = error.message ?: error.toString()
+        )
+        throw error
+      }
+    }
+  }
+
   private fun normalize(value: String?): String = value?.trim()?.uppercase() ?: ""
 
-  private fun makeStatusChangedCallback(): (ModelLoadingStatus) -> Unit =
-    { status -> Log.d(TAG, "model loading status: $status") }
+  private fun makeStatusChangedCallback(
+    modelName: String? = null,
+    modelRole: String? = null,
+    onProgress: ((NativeModelProgressEvent) -> Unit)? = null
+  ): (ModelLoadingStatus) -> Unit =
+    { status ->
+      Log.d(TAG, "model loading status[$modelName/$modelRole]: $status")
+      if (normalize(status.name) == "READY" || normalize(status.name) == "LOADED") {
+        emitProgress(onProgress, "ready", modelRole, modelName, progress = 1.0)
+      }
+    }
 
   private fun makeDownloadedGigabytesCallback(onDownload: ((Double) -> Unit)?): (Long) -> Unit =
     { bytes ->
@@ -78,6 +135,25 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       Log.d(TAG, "downloaded model size=${formatGigabytes(gigabytes)} GB")
       onDownload?.invoke(gigabytes)
     }
+
+  private fun makeDownloadedGigabytesCallback(modelName: String): (Long) -> Unit =
+    { bytes ->
+      val gigabytes = bytes.toDouble() / BYTES_PER_GIGABYTE
+      Log.d(TAG, "downloaded auxiliary model size[$modelName]=${formatGigabytes(gigabytes)} GB")
+    }
+
+  private fun makeAuxiliaryProgressCallback(
+    modelName: String,
+    onProgress: ((NativeModelProgressEvent) -> Unit)?
+  ): (Float) -> Unit = { progress ->
+    emitProgress(
+      onProgress,
+      "downloading",
+      "auxiliary",
+      modelName,
+      progress = progress.toDouble().coerceIn(0.0, 1.0)
+    )
+  }
 
   private fun formatGigabytes(gigabytes: Double): String =
     "%.3f".format(gigabytes)
@@ -87,6 +163,13 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       "RUN_SPEED" -> LLMModelMode.RUN_SPEED
       "RUN_ACCURACY" -> LLMModelMode.RUN_ACCURACY
       else -> LLMModelMode.RUN_AUTO
+    }
+
+  private fun makeGenericModelMode(value: String?): ModelMode =
+    when (normalize(value)) {
+      "RUN_SPEED" -> ModelMode.RUN_SPEED
+      "RUN_ACCURACY" -> ModelMode.RUN_ACCURACY
+      else -> ModelMode.RUN_AUTO
     }
 
   private fun makeDataSetType(value: String?): LLMDataSetType? =
@@ -144,4 +227,26 @@ class HybridZeticLLM : HybridZeticLLMSpec() {
       "NPU" -> APType.NPU
       else -> throw IllegalArgumentException("INVALID_OPTION: Unsupported apType: $value")
     }
+
+  private fun emitProgress(
+    callback: ((NativeModelProgressEvent) -> Unit)?,
+    phase: String,
+    modelRole: String?,
+    modelName: String?,
+    progress: Double? = null,
+    error: String? = null
+  ) {
+    if (callback == null || modelRole == null || modelName == null) {
+      return
+    }
+    callback(
+      NativeModelProgressEvent(
+        phase = phase,
+        modelRole = modelRole,
+        modelName = modelName,
+        progress = progress,
+        error = error
+      )
+    )
+  }
 }

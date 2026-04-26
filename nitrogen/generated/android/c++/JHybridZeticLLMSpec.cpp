@@ -15,12 +15,15 @@ namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
 namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
 // Forward declaration of `NativeExplicitRuntimeConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
+// Forward declaration of `NativeModelProgressEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeModelProgressEvent; }
 
 #include <memory>
 #include "HybridZeticLLMModelSpec.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JHybridZeticLLMModelSpec.hpp"
+#include <NitroModules/JUnit.hpp>
 #include "NativeLoadModelConfig.hpp"
 #include "JNativeLoadModelConfig.hpp"
 #include <string>
@@ -32,6 +35,9 @@ namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
 #include <functional>
 #include "JFunc_void_double.hpp"
 #include <NitroModules/JNICallable.hpp>
+#include "NativeModelProgressEvent.hpp"
+#include "JFunc_void_NativeModelProgressEvent.hpp"
+#include "JNativeModelProgressEvent.hpp"
 
 namespace margelo::nitro::zeticllm {
 
@@ -74,6 +80,21 @@ namespace margelo::nitro::zeticllm {
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
         auto __result = jni::static_ref_cast<JHybridZeticLLMModelSpec::JavaPart>(__boxedResult);
         __promise->resolve(__result->getJHybridZeticLLMModelSpec());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<void>> JHybridZeticLLMSpec::preloadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& onProgress) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeLoadModelConfig> /* config */, jni::alias_ref<JFunc_void_NativeModelProgressEvent::javaobject> /* onProgress */)>("preloadModel_cxx");
+    auto __result = method(_javaPart, JNativeLoadModelConfig::fromCpp(config), onProgress.has_value() ? JFunc_void_NativeModelProgressEvent_cxx::fromCpp(onProgress.value()) : nullptr);
+    return [&]() {
+      auto __promise = Promise<void>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& /* unit */) {
+        __promise->resolve();
       });
       __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
         jni::JniException __jniError(__throwable);

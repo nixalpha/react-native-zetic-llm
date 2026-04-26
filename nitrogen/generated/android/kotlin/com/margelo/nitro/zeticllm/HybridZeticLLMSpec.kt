@@ -37,6 +37,15 @@ abstract class HybridZeticLLMSpec: HybridObject() {
     val __result = loadModel(config, onDownload?.let { it })
     return __result
   }
+  
+  abstract fun preloadModel(config: NativeLoadModelConfig, onProgress: ((event: NativeModelProgressEvent) -> Unit)?): Promise<Unit>
+  
+  @DoNotStrip
+  @Keep
+  private fun preloadModel_cxx(config: NativeLoadModelConfig, onProgress: Func_void_NativeModelProgressEvent?): Promise<Unit> {
+    val __result = preloadModel(config, onProgress?.let { it })
+    return __result
+  }
 
   // Default implementation of `HybridObject.toString()`
   override fun toString(): String {

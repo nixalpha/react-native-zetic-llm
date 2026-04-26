@@ -39,12 +39,12 @@ abstract class HybridZeticLLMModelSpec: HybridObject() {
     return __result
   }
   
-  abstract fun generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: ((event: TokenEvent) -> Unit)?): Promise<GenerateResult>
+  abstract fun generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: ((event: TokenEvent) -> Unit)?, onProgress: ((event: NativeModelProgressEvent) -> Unit)?): Promise<GenerateResult>
   
   @DoNotStrip
   @Keep
-  private fun generateMultimodal_cxx(config: NativeMultimodalGenerateConfig, onToken: Func_void_TokenEvent?): Promise<GenerateResult> {
-    val __result = generateMultimodal(config, onToken?.let { it })
+  private fun generateMultimodal_cxx(config: NativeMultimodalGenerateConfig, onToken: Func_void_TokenEvent?, onProgress: Func_void_NativeModelProgressEvent?): Promise<GenerateResult> {
+    val __result = generateMultimodal(config, onToken?.let { it }, onProgress?.let { it })
     return __result
   }
   

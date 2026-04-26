@@ -17,6 +17,8 @@
 namespace margelo::nitro::zeticllm { class HybridZeticLLMModelSpec; }
 // Forward declaration of `NativeLoadModelConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
+// Forward declaration of `NativeModelProgressEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeModelProgressEvent; }
 
 #include <memory>
 #include "HybridZeticLLMModelSpec.hpp"
@@ -24,6 +26,7 @@ namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
 #include "NativeLoadModelConfig.hpp"
 #include <functional>
 #include <optional>
+#include "NativeModelProgressEvent.hpp"
 
 namespace margelo::nitro::zeticllm {
 
@@ -57,6 +60,7 @@ namespace margelo::nitro::zeticllm {
     public:
       // Methods
       virtual std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> loadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(double /* progress */)>>& onDownload) = 0;
+      virtual std::shared_ptr<Promise<void>> preloadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& onProgress) = 0;
 
     protected:
       // Hybrid Setup

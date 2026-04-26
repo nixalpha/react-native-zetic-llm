@@ -45,11 +45,76 @@ final class HybridZeticLLM: HybridZeticLLMSpec {
     }
   }
 
+  func preloadModel(
+    config: NativeLoadModelConfig,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
+  ) throws -> Promise<Void> {
+    return Promise.async {
+      if config.explicitRuntime != nil {
+        throw ZeticLLMError.invalidOption("explicitRuntime is not supported for preloadModel.")
+      }
+
+      Self.emitProgress(
+        onProgress,
+        phase: "starting",
+        modelRole: "auxiliary",
+        modelName: config.name,
+        progress: 0
+      )
+
+      do {
+        _ = try ZeticMLangeModel(
+          personalKey: config.personalKey,
+          name: config.name,
+          version: config.version.map { Int($0) },
+          modelMode: Self.makeGenericModelMode(config.modelMode),
+          cacheHandlingPolicy: Self.makeCachePolicy(config.cacheHandlingPolicy),
+          onDownload: { progress in
+            Self.emitProgress(
+              onProgress,
+              phase: "downloading",
+              modelRole: "auxiliary",
+              modelName: config.name,
+              progress: Double(progress)
+            )
+          }
+        )
+        Self.emitProgress(
+          onProgress,
+          phase: "ready",
+          modelRole: "auxiliary",
+          modelName: config.name,
+          progress: 1
+        )
+      } catch {
+        Self.emitProgress(
+          onProgress,
+          phase: "error",
+          modelRole: "auxiliary",
+          modelName: config.name,
+          error: error.localizedDescription
+        )
+        throw error
+      }
+    }
+  }
+
   private static func normalize(_ value: String?) -> String {
     return (value ?? "").trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
   }
 
   private static func makeModelMode(_ value: String?) -> LLMModelMode {
+    switch normalize(value) {
+    case "RUN_SPEED":
+      return .RUN_SPEED
+    case "RUN_ACCURACY":
+      return .RUN_ACCURACY
+    default:
+      return .RUN_AUTO
+    }
+  }
+
+  private static func makeGenericModelMode(_ value: String?) -> ModelMode {
     switch normalize(value) {
     case "RUN_SPEED":
       return .RUN_SPEED
@@ -147,6 +212,25 @@ final class HybridZeticLLM: HybridZeticLLMSpec {
     default:
       throw ZeticLLMError.invalidOption("Unsupported apType: \(value ?? "")")
     }
+  }
+
+  private static func emitProgress(
+    _ callback: ((NativeModelProgressEvent) -> Void)?,
+    phase: String,
+    modelRole: String,
+    modelName: String,
+    progress: Double? = nil,
+    error: String? = nil
+  ) {
+    callback?(
+      NativeModelProgressEvent(
+        phase: phase,
+        modelRole: modelRole,
+        modelName: modelName,
+        progress: progress,
+        error: error
+      )
+    )
   }
 }
 

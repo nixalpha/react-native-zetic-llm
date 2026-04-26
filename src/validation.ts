@@ -23,6 +23,12 @@ export type ImageResizeMode = 'stretch' | 'contain' | 'cover'
 export type ImageColorOrder = 'rgb' | 'bgr'
 export type ImageLayout = 'nchw' | 'nhwc'
 export type MultimodalMemoryPolicy = 'auto' | 'keepDecoder' | 'swapDecoder'
+export type ModelRole =
+  | 'decoder'
+  | 'audioEncoder'
+  | 'imageEncoder'
+  | 'auxiliary'
+export type ModelProgressPhase = 'starting' | 'downloading' | 'ready' | 'error'
 
 export interface LLMInitOption {
   kvCacheCleanupPolicy?: LLMKVCacheCleanupPolicy
@@ -102,6 +108,14 @@ export interface MultimodalGenerateConfig {
   memoryPolicy?: MultimodalMemoryPolicy
 }
 
+export interface ModelProgressEvent {
+  phase: ModelProgressPhase
+  modelRole: ModelRole
+  modelName: string
+  progress?: number
+  error?: string
+}
+
 const MODEL_MODES = new Set<LLMModelMode>([
   'RUN_AUTO',
   'RUN_SPEED',
@@ -134,12 +148,21 @@ const CACHE_POLICIES = new Set<CacheHandlingPolicy>([
   'REMOVE_OVERLAPPING',
   'KEEP_EXISTING',
 ])
-const MEDIA_INPUT_TYPES = new Set<MediaInputType>(['uri', 'bytes', 'pcm', 'pixels'])
+const MEDIA_INPUT_TYPES = new Set<MediaInputType>([
+  'uri',
+  'bytes',
+  'pcm',
+  'pixels',
+])
 const PCM_FORMATS = new Set<PCMFormat>(['float32', 'int16'])
 const PIXEL_FORMATS = new Set<PixelFormat>(['rgba8', 'rgb8'])
 const TENSOR_DATA_TYPES = new Set<TensorDataType>(['float32', 'uint8', 'int8'])
 const AUDIO_PREPROCESSORS = new Set<AudioPreprocess>(['qwen-omni-audio'])
-const IMAGE_RESIZE_MODES = new Set<ImageResizeMode>(['stretch', 'contain', 'cover'])
+const IMAGE_RESIZE_MODES = new Set<ImageResizeMode>([
+  'stretch',
+  'contain',
+  'cover',
+])
 const IMAGE_COLOR_ORDERS = new Set<ImageColorOrder>(['rgb', 'bgr'])
 const IMAGE_LAYOUTS = new Set<ImageLayout>(['nchw', 'nhwc'])
 const MEMORY_POLICIES = new Set<MultimodalMemoryPolicy>([
@@ -148,13 +171,21 @@ const MEMORY_POLICIES = new Set<MultimodalMemoryPolicy>([
   'swapDecoder',
 ])
 
-function assertString(value: string | undefined, field: string): asserts value is string {
+function assertString(
+  value: string | undefined,
+  field: string
+): asserts value is string {
   if (typeof value !== 'string' || value.trim().length === 0) {
-    throw new Error(`react-native-zetic-llm: ${field} must be a non-empty string.`)
+    throw new Error(
+      `react-native-zetic-llm: ${field} must be a non-empty string.`
+    )
   }
 }
 
-function assertArrayBuffer(value: unknown, field: string): asserts value is ArrayBuffer {
+function assertArrayBuffer(
+  value: unknown,
+  field: string
+): asserts value is ArrayBuffer {
   if (
     value == null ||
     typeof value !== 'object' ||
@@ -178,23 +209,36 @@ function assertEnum<T extends string>(
 
 function assertPositiveInteger(value: number | undefined, field: string) {
   if (value == null || !Number.isInteger(value) || value <= 0) {
-    throw new Error(`react-native-zetic-llm: ${field} must be a positive integer.`)
+    throw new Error(
+      `react-native-zetic-llm: ${field} must be a positive integer.`
+    )
   }
 }
 
-function assertNumberArray(value: number[] | undefined, field: string, required = false) {
+function assertNumberArray(
+  value: number[] | undefined,
+  field: string,
+  required = false
+) {
   if (value == null) {
     if (required) {
       throw new Error(`react-native-zetic-llm: ${field} is required.`)
     }
     return
   }
-  if (!Array.isArray(value) || value.some((item) => typeof item !== 'number' || !Number.isFinite(item))) {
-    throw new Error(`react-native-zetic-llm: ${field} must be an array of finite numbers.`)
+  if (
+    !Array.isArray(value) ||
+    value.some((item) => typeof item !== 'number' || !Number.isFinite(item))
+  ) {
+    throw new Error(
+      `react-native-zetic-llm: ${field} must be an array of finite numbers.`
+    )
   }
 }
 
-export function validateLoadModelConfig(config: LoadModelConfig): LoadModelConfig {
+export function validateLoadModelConfig(
+  config: LoadModelConfig
+): LoadModelConfig {
   if (config == null || typeof config !== 'object') {
     throw new Error('react-native-zetic-llm: config is required.')
   }
@@ -202,38 +246,64 @@ export function validateLoadModelConfig(config: LoadModelConfig): LoadModelConfi
   assertString(config.personalKey, 'personalKey')
   assertString(config.name, 'name')
 
-  if (config.version != null && (!Number.isInteger(config.version) || config.version <= 0)) {
-    throw new Error('react-native-zetic-llm: version must be a positive integer.')
+  if (
+    config.version != null &&
+    (!Number.isInteger(config.version) || config.version <= 0)
+  ) {
+    throw new Error(
+      'react-native-zetic-llm: version must be a positive integer.'
+    )
   }
 
   assertEnum(config.modelMode, MODEL_MODES, 'modelMode')
   assertEnum(config.dataSetType, DATA_SET_TYPES, 'dataSetType')
   assertEnum(config.cacheHandlingPolicy, CACHE_POLICIES, 'cacheHandlingPolicy')
-  assertEnum(config.initOption?.kvCacheCleanupPolicy, KV_POLICIES, 'initOption.kvCacheCleanupPolicy')
+  assertEnum(
+    config.initOption?.kvCacheCleanupPolicy,
+    KV_POLICIES,
+    'initOption.kvCacheCleanupPolicy'
+  )
 
   if (config.initOption?.nCtx != null) {
-    if (!Number.isInteger(config.initOption.nCtx) || config.initOption.nCtx <= 0) {
-      throw new Error('react-native-zetic-llm: initOption.nCtx must be a positive integer.')
+    if (
+      !Number.isInteger(config.initOption.nCtx) ||
+      config.initOption.nCtx <= 0
+    ) {
+      throw new Error(
+        'react-native-zetic-llm: initOption.nCtx must be a positive integer.'
+      )
     }
   }
 
   if (config.explicitRuntime != null) {
     assertEnum(config.explicitRuntime.target, TARGETS, 'explicitRuntime.target')
-    assertEnum(config.explicitRuntime.quantType, QUANT_TYPES, 'explicitRuntime.quantType')
-    assertEnum(config.explicitRuntime.apType, AP_TYPES, 'explicitRuntime.apType')
+    assertEnum(
+      config.explicitRuntime.quantType,
+      QUANT_TYPES,
+      'explicitRuntime.quantType'
+    )
+    assertEnum(
+      config.explicitRuntime.apType,
+      AP_TYPES,
+      'explicitRuntime.apType'
+    )
   }
 
   return config
 }
 
-export function validateMultimodalProfile(profile: MultimodalProfile): MultimodalProfile {
+export function validateMultimodalProfile(
+  profile: MultimodalProfile
+): MultimodalProfile {
   if (profile == null || typeof profile !== 'object') {
     throw new Error('react-native-zetic-llm: profile is required.')
   }
 
   assertString(profile.name, 'profile.name')
   if (!Array.isArray(profile.requiredSpecialTokens)) {
-    throw new Error('react-native-zetic-llm: profile.requiredSpecialTokens must be an array.')
+    throw new Error(
+      'react-native-zetic-llm: profile.requiredSpecialTokens must be an array.'
+    )
   }
   profile.requiredSpecialTokens.forEach((token, index) => {
     assertString(token, `profile.requiredSpecialTokens[${index}]`)
@@ -259,7 +329,9 @@ export function validateMultimodalEncoderConfig(
   assertEnum(config.inputDataType, TENSOR_DATA_TYPES, `${field}.inputDataType`)
   if (config.outputIndex != null) {
     if (!Number.isInteger(config.outputIndex) || config.outputIndex < 0) {
-      throw new Error(`react-native-zetic-llm: ${field}.outputIndex must be a non-negative integer.`)
+      throw new Error(
+        `react-native-zetic-llm: ${field}.outputIndex must be a non-negative integer.`
+      )
     }
   }
   if (config.outputHiddenSize != null) {
@@ -269,7 +341,10 @@ export function validateMultimodalEncoderConfig(
   return config
 }
 
-export function validateMediaInput(input: MediaInput, field: string): MediaInput {
+export function validateMediaInput(
+  input: MediaInput,
+  field: string
+): MediaInput {
   if (input == null || typeof input !== 'object') {
     throw new Error(`react-native-zetic-llm: ${field} must be an object.`)
   }
@@ -309,13 +384,23 @@ export function validateImagePreprocessConfig(
     return undefined
   }
   if (typeof config !== 'object') {
-    throw new Error('react-native-zetic-llm: imagePreprocess must be an object.')
+    throw new Error(
+      'react-native-zetic-llm: imagePreprocess must be an object.'
+    )
   }
 
   assertPositiveInteger(config.width, 'imagePreprocess.width')
   assertPositiveInteger(config.height, 'imagePreprocess.height')
-  assertEnum(config.resizeMode, IMAGE_RESIZE_MODES, 'imagePreprocess.resizeMode')
-  assertEnum(config.colorOrder, IMAGE_COLOR_ORDERS, 'imagePreprocess.colorOrder')
+  assertEnum(
+    config.resizeMode,
+    IMAGE_RESIZE_MODES,
+    'imagePreprocess.resizeMode'
+  )
+  assertEnum(
+    config.colorOrder,
+    IMAGE_COLOR_ORDERS,
+    'imagePreprocess.colorOrder'
+  )
   assertEnum(config.layout, IMAGE_LAYOUTS, 'imagePreprocess.layout')
   assertNumberArray(config.mean, 'imagePreprocess.mean')
   assertNumberArray(config.stdValues, 'imagePreprocess.stdValues')
@@ -347,7 +432,9 @@ export function validateMultimodalGenerateConfig(
 
   config.blocks.forEach((block, index) => {
     if (block == null || typeof block !== 'object') {
-      throw new Error(`react-native-zetic-llm: blocks[${index}] must be an object.`)
+      throw new Error(
+        `react-native-zetic-llm: blocks[${index}] must be an object.`
+      )
     }
 
     switch (block.type) {
@@ -358,21 +445,29 @@ export function validateMultimodalGenerateConfig(
         assertString(block.id, `blocks[${index}].id`)
         validateMediaInput(block.input, `blocks[${index}].input`)
         if (config.audioEncoder == null) {
-          throw new Error('react-native-zetic-llm: audioEncoder is required when blocks include audio.')
+          throw new Error(
+            'react-native-zetic-llm: audioEncoder is required when blocks include audio.'
+          )
         }
         break
       case 'image':
         assertString(block.id, `blocks[${index}].id`)
         validateMediaInput(block.input, `blocks[${index}].input`)
         if (config.imageEncoder == null) {
-          throw new Error('react-native-zetic-llm: imageEncoder is required when blocks include image.')
+          throw new Error(
+            'react-native-zetic-llm: imageEncoder is required when blocks include image.'
+          )
         }
         if (config.imagePreprocess == null) {
-          throw new Error('react-native-zetic-llm: imagePreprocess is required when blocks include image.')
+          throw new Error(
+            'react-native-zetic-llm: imagePreprocess is required when blocks include image.'
+          )
         }
         break
       default:
-        throw new Error(`react-native-zetic-llm: blocks[${index}].type is unsupported.`)
+        throw new Error(
+          `react-native-zetic-llm: blocks[${index}].type is unsupported.`
+        )
     }
   })
 

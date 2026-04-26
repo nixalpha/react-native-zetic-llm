@@ -14,6 +14,7 @@ public protocol HybridZeticLLMSpec_protocol: HybridObject {
 
   // Methods
   func loadModel(config: NativeLoadModelConfig, onDownload: ((_ progress: Double) -> Void)?) throws -> Promise<(any HybridZeticLLMModelSpec)>
+  func preloadModel(config: NativeLoadModelConfig, onProgress: ((_ event: NativeModelProgressEvent) -> Void)?) throws -> Promise<Void>
 }
 
 public extension HybridZeticLLMSpec_protocol {

@@ -26,6 +26,8 @@ namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
 namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
 // Forward declaration of `NativeMediaInput` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
+// Forward declaration of `NativeModelProgressEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeModelProgressEvent; }
 // Forward declaration of `NativeMultimodalEncoderConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeMultimodalEncoderConfig; }
 // Forward declaration of `NativePromptEmbeddingBlock` to properly resolve imports.
@@ -48,6 +50,7 @@ namespace NitroZeticLlm { class HybridZeticLLMSpec_cxx; }
 #include "NativeLLMInitOption.hpp"
 #include "NativeLoadModelConfig.hpp"
 #include "NativeMediaInput.hpp"
+#include "NativeModelProgressEvent.hpp"
 #include "NativeMultimodalEncoderConfig.hpp"
 #include "NativePromptEmbeddingBlock.hpp"
 #include "TokenEvent.hpp"
@@ -343,6 +346,43 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     std::vector<NativePromptEmbeddingBlock> vector;
     vector.reserve(size);
     return vector;
+  }
+  
+  // pragma MARK: std::function<void(const NativeModelProgressEvent& /* event */)>
+  /**
+   * Specialized version of `std::function<void(const NativeModelProgressEvent&)>`.
+   */
+  using Func_void_NativeModelProgressEvent = std::function<void(const NativeModelProgressEvent& /* event */)>;
+  /**
+   * Wrapper class for a `std::function<void(const NativeModelProgressEvent& / * event * /)>`, this can be used from Swift.
+   */
+  class Func_void_NativeModelProgressEvent_Wrapper final {
+  public:
+    explicit Func_void_NativeModelProgressEvent_Wrapper(std::function<void(const NativeModelProgressEvent& /* event */)>&& func): _function(std::make_unique<std::function<void(const NativeModelProgressEvent& /* event */)>>(std::move(func))) {}
+    inline void call(NativeModelProgressEvent event) const noexcept {
+      _function->operator()(event);
+    }
+  private:
+    std::unique_ptr<std::function<void(const NativeModelProgressEvent& /* event */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_NativeModelProgressEvent create_Func_void_NativeModelProgressEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_NativeModelProgressEvent_Wrapper wrap_Func_void_NativeModelProgressEvent(Func_void_NativeModelProgressEvent value) noexcept {
+    return Func_void_NativeModelProgressEvent_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>
+  /**
+   * Specialized version of `std::optional<std::function<void(const NativeModelProgressEvent& / * event * /)>>`.
+   */
+  using std__optional_std__function_void_const_NativeModelProgressEvent_____event______ = std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>;
+  inline std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>> create_std__optional_std__function_void_const_NativeModelProgressEvent_____event______(const std::function<void(const NativeModelProgressEvent& /* event */)>& value) noexcept {
+    return std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>(value);
+  }
+  inline bool has_value_std__optional_std__function_void_const_NativeModelProgressEvent_____event______(const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::function<void(const NativeModelProgressEvent& /* event */)> get_std__optional_std__function_void_const_NativeModelProgressEvent_____event______(const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& optional) noexcept {
+    return optional.value();
   }
   
   // pragma MARK: std::shared_ptr<Promise<std::vector<double>>>

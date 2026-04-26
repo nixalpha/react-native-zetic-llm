@@ -156,7 +156,7 @@ open class HybridZeticLLMModelSpec_cxx {
   }
   
   @inline(__always)
-  public final func generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: bridge.std__optional_std__function_void_const_TokenEvent_____event______) -> bridge.Result_std__shared_ptr_Promise_GenerateResult___ {
+  public final func generateMultimodal(config: NativeMultimodalGenerateConfig, onToken: bridge.std__optional_std__function_void_const_TokenEvent_____event______, onProgress: bridge.std__optional_std__function_void_const_NativeModelProgressEvent_____event______) -> bridge.Result_std__shared_ptr_Promise_GenerateResult___ {
     do {
       let __result = try self.__implementation.generateMultimodal(config: config, onToken: { () -> ((_ event: TokenEvent) -> Void)? in
         if bridge.has_value_std__optional_std__function_void_const_TokenEvent_____event______(onToken) {
@@ -164,6 +164,18 @@ open class HybridZeticLLMModelSpec_cxx {
           return { () -> (TokenEvent) -> Void in
             let __wrappedFunction = bridge.wrap_Func_void_TokenEvent(__unwrapped)
             return { (__event: TokenEvent) -> Void in
+              __wrappedFunction.call(__event)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }(), onProgress: { () -> ((_ event: NativeModelProgressEvent) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_NativeModelProgressEvent_____event______(onProgress) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_NativeModelProgressEvent_____event______(onProgress)
+          return { () -> (NativeModelProgressEvent) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_NativeModelProgressEvent(__unwrapped)
+            return { (__event: NativeModelProgressEvent) -> Void in
               __wrappedFunction.call(__event)
             }
           }()

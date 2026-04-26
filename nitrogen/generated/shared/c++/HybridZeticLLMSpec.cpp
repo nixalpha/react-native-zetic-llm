@@ -15,6 +15,7 @@ namespace margelo::nitro::zeticllm {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("loadModel", &HybridZeticLLMSpec::loadModel);
+      prototype.registerHybridMethod("preloadModel", &HybridZeticLLMSpec::preloadModel);
     });
   }
 

@@ -20,6 +20,8 @@ namespace margelo::nitro::zeticllm { struct NativeLoadModelConfig; }
 namespace margelo::nitro::zeticllm { struct NativeLLMInitOption; }
 // Forward declaration of `NativeExplicitRuntimeConfig` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
+// Forward declaration of `NativeModelProgressEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeModelProgressEvent; }
 
 #include <memory>
 #include "HybridZeticLLMModelSpec.hpp"
@@ -30,6 +32,7 @@ namespace margelo::nitro::zeticllm { struct NativeExplicitRuntimeConfig; }
 #include "NativeLLMInitOption.hpp"
 #include "NativeExplicitRuntimeConfig.hpp"
 #include <functional>
+#include "NativeModelProgressEvent.hpp"
 
 #include "NitroZeticLlm-Swift-Cxx-Umbrella.hpp"
 
@@ -83,6 +86,14 @@ namespace margelo::nitro::zeticllm {
     // Methods
     inline std::shared_ptr<Promise<std::shared_ptr<HybridZeticLLMModelSpec>>> loadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(double /* progress */)>>& onDownload) override {
       auto __result = _swiftPart.loadModel(std::forward<decltype(config)>(config), onDownload);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<void>> preloadModel(const NativeLoadModelConfig& config, const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& onProgress) override {
+      auto __result = _swiftPart.preloadModel(std::forward<decltype(config)>(config), onProgress);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

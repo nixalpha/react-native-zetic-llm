@@ -1,7 +1,9 @@
+import { preloadModel } from '../index'
 import {
   validateLoadModelConfig,
   validateMultimodalGenerateConfig,
   validateMultimodalProfile,
+  type ModelProgressEvent,
 } from '../validation'
 
 describe('validateLoadModelConfig', () => {
@@ -134,5 +136,24 @@ describe('validateMultimodalGenerateConfig', () => {
         ],
       })
     ).toThrow(/imagePreprocess/)
+  })
+})
+
+describe('public api exports', () => {
+  it('exposes preloadModel for auxiliary encoder downloads', () => {
+    expect(typeof preloadModel).toBe('function')
+  })
+
+  it('supports structured model progress events', () => {
+    const event: ModelProgressEvent = {
+      phase: 'downloading',
+      modelRole: 'imageEncoder',
+      modelName: 'thetangylemon/qwen2_5_omni_vision_encoder_chunk_f16',
+      progress: 0.42,
+    }
+
+    expect(event.phase).toBe('downloading')
+    expect(event.modelRole).toBe('imageEncoder')
+    expect(event.progress).toBe(0.42)
   })
 })

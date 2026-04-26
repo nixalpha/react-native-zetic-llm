@@ -81,6 +81,14 @@ export interface TokenEvent {
   status: number
 }
 
+export interface NativeModelProgressEvent {
+  phase: string
+  modelRole: string
+  modelName: string
+  progress?: number
+  error?: string
+}
+
 export interface GenerateResult {
   text: string
   promptTokens: number
@@ -88,12 +96,18 @@ export interface GenerateResult {
   status: number
 }
 
-export interface ZeticLLMModel
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
-  generate(prompt: string, onToken?: (event: TokenEvent) => void): Promise<GenerateResult>
+export interface ZeticLLMModel extends HybridObject<{
+  ios: 'swift'
+  android: 'kotlin'
+}> {
+  generate(
+    prompt: string,
+    onToken?: (event: TokenEvent) => void
+  ): Promise<GenerateResult>
   generateMultimodal(
     config: NativeMultimodalGenerateConfig,
-    onToken?: (event: TokenEvent) => void
+    onToken?: (event: TokenEvent) => void,
+    onProgress?: (event: NativeModelProgressEvent) => void
   ): Promise<GenerateResult>
   runWithEmbeddings(
     embeddings: ArrayBuffer,
@@ -107,10 +121,16 @@ export interface ZeticLLMModel
   release(): void
 }
 
-export interface ZeticLLM
-  extends HybridObject<{ ios: 'swift'; android: 'kotlin' }> {
+export interface ZeticLLM extends HybridObject<{
+  ios: 'swift'
+  android: 'kotlin'
+}> {
   loadModel(
     config: NativeLoadModelConfig,
     onDownload?: (progress: number) => void
   ): Promise<ZeticLLMModel>
+  preloadModel(
+    config: NativeLoadModelConfig,
+    onProgress?: (event: NativeModelProgressEvent) => void
+  ): Promise<void>
 }

@@ -57,7 +57,8 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
 
   func generateMultimodal(
     config: NativeMultimodalGenerateConfig,
-    onToken: ((TokenEvent) -> Void)?
+    onToken: ((TokenEvent) -> Void)?,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
   ) throws -> Promise<GenerateResult> {
     return Promise.async {
       let activeModel = try self.beginGeneration()
@@ -85,12 +86,14 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
           mediaEmbeddings[id] = try self.encodeAudioBlock(
             input: input,
             encoderConfig: config.audioEncoder,
-            audioPreprocess: config.audioPreprocess)
+            audioPreprocess: config.audioPreprocess,
+            onProgress: onProgress)
         } else {
           mediaEmbeddings[id] = try self.encodeImageBlock(
             input: input,
             encoderConfig: config.imageEncoder,
-            imagePreprocess: config.imagePreprocess)
+            imagePreprocess: config.imagePreprocess,
+            onProgress: onProgress)
         }
       }
 
@@ -246,7 +249,8 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
   private func encodeAudioBlock(
     input: NativeMediaInput,
     encoderConfig: NativeMultimodalEncoderConfig?,
-    audioPreprocess: String?
+    audioPreprocess: String?,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
   ) throws -> [Float] {
     guard let encoderConfig else {
       throw ZeticLLMError.invalidOption("audioEncoder is required for audio blocks.")
@@ -260,13 +264,18 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
 
     let pcm = try input.toPcmFloatArray().resampleMonoTo16k()
     let chunks = QwenOmniAudioPreprocessor.melChunks(samples: pcm.samples)
-    return try runEncoderChunks(config: encoderConfig, chunks: chunks)
+    return try runEncoderChunks(
+      config: encoderConfig,
+      chunks: chunks,
+      modelRole: "audioEncoder",
+      onProgress: onProgress)
   }
 
   private func encodeImageBlock(
     input: NativeMediaInput,
     encoderConfig: NativeMultimodalEncoderConfig?,
-    imagePreprocess: NativeImagePreprocessConfig?
+    imagePreprocess: NativeImagePreprocessConfig?,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
   ) throws -> [Float] {
     guard let encoderConfig else {
       throw ZeticLLMError.invalidOption("imageEncoder is required for image blocks.")
@@ -275,14 +284,20 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
       throw ZeticLLMError.invalidOption("imagePreprocess is required for image blocks.")
     }
     let tensor = try input.toImageTensor(preprocess: imagePreprocess, encoder: encoderConfig)
-    return try runEncoderOnce(config: encoderConfig, payload: tensor)
+    return try runEncoderOnce(
+      config: encoderConfig,
+      payload: tensor,
+      modelRole: "imageEncoder",
+      onProgress: onProgress)
   }
 
   private func runEncoderChunks(
     config: NativeMultimodalEncoderConfig,
-    chunks: [TensorPayload]
+    chunks: [TensorPayload],
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
   ) throws -> [Float] {
-    let encoder = try createEncoder(config.model)
+    let encoder = try createEncoder(config.model, modelRole: modelRole, onProgress: onProgress)
     var embeddings: [Float] = []
     for payload in chunks {
       let outputs = try encoder.run(inputs: [payload.toTensor()])
@@ -294,24 +309,65 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
 
   private func runEncoderOnce(
     config: NativeMultimodalEncoderConfig,
-    payload: TensorPayload
+    payload: TensorPayload,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
   ) throws -> [Float] {
-    let encoder = try createEncoder(config.model)
+    let encoder = try createEncoder(config.model, modelRole: modelRole, onProgress: onProgress)
     let outputs = try encoder.run(inputs: [payload.toTensor()])
     return try outputs[config.outputIndexValue()].toFloatArray()
   }
 
-  private func createEncoder(_ config: NativeLoadModelConfig) throws -> ZeticMLangeModel {
+  private func createEncoder(
+    _ config: NativeLoadModelConfig,
+    modelRole: String,
+    onProgress: ((NativeModelProgressEvent) -> Void)?
+  ) throws -> ZeticMLangeModel {
     if config.explicitRuntime != nil {
       throw ZeticLLMError.invalidOption("explicitRuntime is not supported for encoder models yet.")
     }
-    return try ZeticMLangeModel(
-      personalKey: config.personalKey,
-      name: config.name,
-      version: config.version.map { Int($0) },
-      modelMode: Self.makeGenericModelMode(config.modelMode),
-      cacheHandlingPolicy: Self.makeCachePolicy(config.cacheHandlingPolicy)
+    Self.emitProgress(
+      onProgress,
+      phase: "starting",
+      modelRole: modelRole,
+      modelName: config.name,
+      progress: 0
     )
+    do {
+      let encoder = try ZeticMLangeModel(
+        personalKey: config.personalKey,
+        name: config.name,
+        version: config.version.map { Int($0) },
+        modelMode: Self.makeGenericModelMode(config.modelMode),
+        cacheHandlingPolicy: Self.makeCachePolicy(config.cacheHandlingPolicy),
+        onDownload: { progress in
+          Self.emitProgress(
+            onProgress,
+            phase: "downloading",
+            modelRole: modelRole,
+            modelName: config.name,
+            progress: Double(progress)
+          )
+        }
+      )
+      Self.emitProgress(
+        onProgress,
+        phase: "ready",
+        modelRole: modelRole,
+        modelName: config.name,
+        progress: 1
+      )
+      return encoder
+    } catch {
+      Self.emitProgress(
+        onProgress,
+        phase: "error",
+        modelRole: modelRole,
+        modelName: config.name,
+        error: error.localizedDescription
+      )
+      throw error
+    }
   }
 
   private static func makeGenericModelMode(_ value: String?) -> ModelMode {
@@ -332,6 +388,25 @@ final class HybridZeticLLMModel: HybridZeticLLMModelSpec {
     default:
       return .REMOVE_OVERLAPPING
     }
+  }
+
+  private static func emitProgress(
+    _ callback: ((NativeModelProgressEvent) -> Void)?,
+    phase: String,
+    modelRole: String,
+    modelName: String,
+    progress: Double? = nil,
+    error: String? = nil
+  ) {
+    callback?(
+      NativeModelProgressEvent(
+        phase: phase,
+        modelRole: modelRole,
+        modelName: modelName,
+        progress: progress,
+        error: error
+      )
+    )
   }
 }
 

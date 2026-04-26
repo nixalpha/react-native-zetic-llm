@@ -39,6 +39,14 @@ namespace margelo::nitro::zeticllm::bridge::swift {
     };
   }
   
+  // pragma MARK: std::function<void(const NativeModelProgressEvent& /* event */)>
+  Func_void_NativeModelProgressEvent create_Func_void_NativeModelProgressEvent(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroZeticLlm::Func_void_NativeModelProgressEvent::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const NativeModelProgressEvent& event) mutable -> void {
+      swiftClosure.call(event);
+    };
+  }
+  
   // pragma MARK: std::function<void(const std::vector<double>& /* result */)>
   Func_void_std__vector_double_ create_Func_void_std__vector_double_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroZeticLlm::Func_void_std__vector_double_::fromUnsafe(swiftClosureWrapper);

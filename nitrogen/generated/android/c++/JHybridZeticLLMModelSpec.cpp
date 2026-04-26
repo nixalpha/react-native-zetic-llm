@@ -29,6 +29,8 @@ namespace margelo::nitro::zeticllm { struct NativeImagePreprocessConfig; }
 namespace margelo::nitro::zeticllm { struct NativePromptEmbeddingBlock; }
 // Forward declaration of `NativeMediaInput` to properly resolve imports.
 namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
+// Forward declaration of `NativeModelProgressEvent` to properly resolve imports.
+namespace margelo::nitro::zeticllm { struct NativeModelProgressEvent; }
 
 #include "GenerateResult.hpp"
 #include <NitroModules/Promise.hpp>
@@ -63,6 +65,9 @@ namespace margelo::nitro::zeticllm { struct NativeMediaInput; }
 #include "JNativePromptEmbeddingBlock.hpp"
 #include "NativeMediaInput.hpp"
 #include "JNativeMediaInput.hpp"
+#include "NativeModelProgressEvent.hpp"
+#include "JFunc_void_NativeModelProgressEvent.hpp"
+#include "JNativeModelProgressEvent.hpp"
 
 namespace margelo::nitro::zeticllm {
 
@@ -113,9 +118,9 @@ namespace margelo::nitro::zeticllm {
       return __promise;
     }();
   }
-  std::shared_ptr<Promise<GenerateResult>> JHybridZeticLLMModelSpec::generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeMultimodalGenerateConfig> /* config */, jni::alias_ref<JFunc_void_TokenEvent::javaobject> /* onToken */)>("generateMultimodal_cxx");
-    auto __result = method(_javaPart, JNativeMultimodalGenerateConfig::fromCpp(config), onToken.has_value() ? JFunc_void_TokenEvent_cxx::fromCpp(onToken.value()) : nullptr);
+  std::shared_ptr<Promise<GenerateResult>> JHybridZeticLLMModelSpec::generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken, const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& onProgress) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>(jni::alias_ref<JNativeMultimodalGenerateConfig> /* config */, jni::alias_ref<JFunc_void_TokenEvent::javaobject> /* onToken */, jni::alias_ref<JFunc_void_NativeModelProgressEvent::javaobject> /* onProgress */)>("generateMultimodal_cxx");
+    auto __result = method(_javaPart, JNativeMultimodalGenerateConfig::fromCpp(config), onToken.has_value() ? JFunc_void_TokenEvent_cxx::fromCpp(onToken.value()) : nullptr, onProgress.has_value() ? JFunc_void_NativeModelProgressEvent_cxx::fromCpp(onProgress.value()) : nullptr);
     return [&]() {
       auto __promise = Promise<GenerateResult>::create();
       __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {

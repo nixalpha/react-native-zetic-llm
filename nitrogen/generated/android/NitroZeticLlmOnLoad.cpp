@@ -17,6 +17,7 @@
 
 #include "JHybridZeticLLMModelSpec.hpp"
 #include "JFunc_void_TokenEvent.hpp"
+#include "JFunc_void_NativeModelProgressEvent.hpp"
 #include "JHybridZeticLLMSpec.hpp"
 #include "JFunc_void_double.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
@@ -45,6 +46,7 @@ void registerAllNatives() {
   // Register native JNI methods
   margelo::nitro::zeticllm::JHybridZeticLLMModelSpec::CxxPart::registerNatives();
   margelo::nitro::zeticllm::JFunc_void_TokenEvent_cxx::registerNatives();
+  margelo::nitro::zeticllm::JFunc_void_NativeModelProgressEvent_cxx::registerNatives();
   margelo::nitro::zeticllm::JHybridZeticLLMSpec::CxxPart::registerNatives();
   margelo::nitro::zeticllm::JFunc_void_double_cxx::registerNatives();
 

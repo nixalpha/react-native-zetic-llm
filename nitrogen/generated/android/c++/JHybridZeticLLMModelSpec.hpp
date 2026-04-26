@@ -55,7 +55,7 @@ namespace margelo::nitro::zeticllm {
   public:
     // Methods
     std::shared_ptr<Promise<GenerateResult>> generate(const std::string& prompt, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) override;
-    std::shared_ptr<Promise<GenerateResult>> generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) override;
+    std::shared_ptr<Promise<GenerateResult>> generateMultimodal(const NativeMultimodalGenerateConfig& config, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken, const std::optional<std::function<void(const NativeModelProgressEvent& /* event */)>>& onProgress) override;
     std::shared_ptr<Promise<GenerateResult>> runWithEmbeddings(const std::shared_ptr<ArrayBuffer>& embeddings, const std::optional<std::function<void(const TokenEvent& /* event */)>>& onToken) override;
     std::shared_ptr<Promise<std::vector<double>>> tokenize(const std::string& text, std::optional<bool> parseSpecial) override;
     std::shared_ptr<Promise<std::shared_ptr<ArrayBuffer>>> tokenEmbeddings(const std::vector<double>& tokenIds) override;
